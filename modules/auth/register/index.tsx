@@ -9,12 +9,12 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import Link from "next/link";
 
 import { useRegisterForm } from "./functions";
 
 export const RegisterPage = () => {
-  const { errorMessage, form, onSubmit, resetForm, successMessage } =
-    useRegisterForm();
+  const { errorMessage, form, onSubmit, successMessage } = useRegisterForm();
   const {
     formState: { errors, isSubmitting },
     handleSubmit,
@@ -23,17 +23,16 @@ export const RegisterPage = () => {
 
   return (
     <form
-      className="w-full max-w-sm rounded-lg border bg-background/95 p-6 shadow-sm backdrop-blur"
+      className="w-full max-w-xl rounded-lg border bg-background/75 p-6 shadow-2xl backdrop-blur"
       onSubmit={handleSubmit(onSubmit)}
     >
-      <FieldGroup>
+      <FieldGroup className="-space-y-2">
         <div className="space-y-1">
-          <h1 className="text-2xl font-semibold">Create account</h1>
+          <h1 className="text-2xl font-semibold">Create account for <span className="text-primary font-bold">Ize Core Service</span></h1>
           <p className="text-sm text-muted-foreground">
             Fill in your details to register.
           </p>
         </div>
-
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Field data-invalid={!!errors.first_name}>
             <FieldLabel htmlFor="first_name">First name</FieldLabel>
@@ -43,7 +42,10 @@ export const RegisterPage = () => {
               aria-invalid={!!errors.first_name}
               {...register("first_name")}
             />
-            <FieldError errors={[errors.first_name]} />
+            <FieldError
+              className="text-xs sm:whitespace-nowrap sm:text-sm"
+              errors={[errors.first_name]}
+            />
           </Field>
 
           <Field data-invalid={!!errors.last_name}>
@@ -54,7 +56,10 @@ export const RegisterPage = () => {
               aria-invalid={!!errors.last_name}
               {...register("last_name")}
             />
-            <FieldError errors={[errors.last_name]} />
+            <FieldError
+              className="text-xs sm:whitespace-nowrap sm:text-sm"
+              errors={[errors.last_name]}
+            />
           </Field>
         </div>
 
@@ -62,7 +67,6 @@ export const RegisterPage = () => {
           <FieldLabel htmlFor="email">Email</FieldLabel>
           <Input
             id="email"
-            type="email"
             placeholder="john@example.com"
             aria-invalid={!!errors.email}
             {...register("email")}
@@ -124,14 +128,26 @@ export const RegisterPage = () => {
           </p>
         ) : null}
 
-        <Field orientation="horizontal" className="justify-end">
-          <Button type="button" variant="outline" onClick={resetForm}>
-            Reset
+        <div className="flex flex-col items-center gap-3 pt-5">
+          <Button
+            className="h-12 w-full max-w-xs rounded-sm bg-gradient-to-tr from-red-600 to-pink-500 px-8 text-sm font-semibold tracking-[0.25em] text-white shadow-md shadow-pink-500/20 hover:from-red-500 hover:to-pink-400"
+            size="lg"
+            type="submit"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? "CREATING..." : "CREATE ACCOUNT"}
           </Button>
-          <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? "Registering..." : "Register"}
-          </Button>
-        </Field>
+
+          <p className="text-center text-sm text-muted-foreground">
+            Already have an account?{" "}
+            <Link
+              className="font-medium text-primary underline-offset-4 hover:underline"
+              href="/login"
+            >
+              Sign in
+            </Link>
+          </p>
+        </div>
       </FieldGroup>
     </form>
   );
