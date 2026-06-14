@@ -1,9 +1,11 @@
 "use client";
 
-import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
-import { useEffect, useState } from "react";
+import { ChevronLeftIcon, ChevronRightIcon, SearchIcon } from "lucide-react";
+import { type FormEvent, useEffect, useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Table,
   TableBody,
@@ -18,16 +20,65 @@ import {
   getWorkLogs,
   getWorkLogsErrorMessage,
 } from "./functions";
-import { emptyWorkLogs, itemPerPageOptions, type WorkLogsData } from "./models";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { monthOptions, yearOption } from "@/constants/datetime";
+import {
+  emptyWorkLogs,
+  itemPerPageOptions,
+  type WorkLogsData,
+  type WorkLogsQuery,
+} from "./models";
+import { LineMdLoadingLoop } from "@/assets/icons/LineMdLoadingLoop";
+
+type WorkLogsFilterState = {
+  title: string;
+  month: string;
+  year: string;
+};
+
+const getDefaultFilters = (): WorkLogsFilterState => {
+  const today = new Date();
+
+  return {
+    title: "",
+    month: (today.getMonth() + 1).toString().padStart(2, "0"),
+    year: today.getFullYear().toString(),
+  };
+};
+
+const defaultFilters = getDefaultFilters();
+
+const buildFilterQuery = (filters: WorkLogsFilterState) => ({
+  ...(filters.title.trim() ? { title: filters.title.trim() } : {}),
+  ...(filters.month.trim() ? { month: filters.month.trim() } : {}),
+  ...(filters.year.trim() ? { year: filters.year.trim() } : {}),
+});
 
 const useWorkLogs = () => {
   const [workLogs, setWorkLogs] = useState<WorkLogsData>(emptyWorkLogs);
   const [currentPage, setCurrentPage] = useState(emptyWorkLogs.current_page);
-  const [itemPerPage, setItemPerPage] = useState<number>(
-    itemPerPageOptions[0]
-  );
+  const [itemPerPage, setItemPerPage] = useState<number>(itemPerPageOptions[0]);
+  const [filters, setFilters] = useState<WorkLogsFilterState>(defaultFilters);
+  const [appliedFilters, setAppliedFilters] =
+    useState<WorkLogsFilterState>(defaultFilters);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
+
+  const query = useMemo<WorkLogsQuery>(
+    () => ({
+      page: currentPage,
+      limit: itemPerPage,
+      ...buildFilterQuery(appliedFilters),
+    }),
+    [appliedFilters, currentPage, itemPerPage],
+  );
 
   useEffect(() => {
     const loadWorkLogs = async () => {
@@ -35,10 +86,12 @@ const useWorkLogs = () => {
       setErrorMessage("");
 
       try {
-        const data = await getWorkLogs();
+        const data = await getWorkLogs(query);
 
         setWorkLogs(data);
-        setCurrentPage(data.current_page || 1);
+        if (data.current_page && data.current_page !== currentPage) {
+          setCurrentPage(data.current_page);
+        }
       } catch (error) {
         setErrorMessage(getWorkLogsErrorMessage(error));
       } finally {
@@ -47,9 +100,20 @@ const useWorkLogs = () => {
     };
 
     void loadWorkLogs();
-  }, []);
+  }, [currentPage, query]);
 
   const totalPages = workLogs.total_pages || 1;
+  const handleSearch = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setCurrentPage(1);
+    setAppliedFilters(filters);
+  };
+
+  const updateItemPerPage = (value: number) => {
+    setItemPerPage(value);
+    setCurrentPage(1);
+  };
+
   const goToPreviousPage = () => {
     setCurrentPage((page) => Math.max(page - 1, 1));
   };
@@ -60,11 +124,14 @@ const useWorkLogs = () => {
   return {
     currentPage,
     errorMessage,
+    filters,
     goToNextPage,
     goToPreviousPage,
+    handleSearch,
     isLoading,
     itemPerPage,
-    setItemPerPage,
+    setFilters,
+    updateItemPerPage,
     totalPages,
     workLogs,
   };
@@ -74,15 +141,17 @@ export const WorkLogsPage = () => {
   const {
     currentPage,
     errorMessage,
+    filters,
     goToNextPage,
     goToPreviousPage,
+    handleSearch,
     isLoading,
     itemPerPage,
-    setItemPerPage,
+    setFilters,
+    updateItemPerPage,
     totalPages,
     workLogs,
   } = useWorkLogs();
-
   return (
     <section className="mx-auto flex w-full max-w-5xl flex-col gap-6">
       <div className="space-y-1">
@@ -101,9 +170,90 @@ export const WorkLogsPage = () => {
           </p>
         </div>
 
+        <form
+          className="grid gap-3 border-b px-4 py-4 lg:grid-cols-[minmax(220px,1fr)_120px_120px_auto] lg:items-end"
+          onSubmit={handleSearch}
+        >
+          <div className="grid gap-2">
+            <Label htmlFor="work-log-title">Title</Label>
+            <Input
+              id="work-log-title"
+              onChange={(event) =>
+                setFilters((value) => ({
+                  ...value,
+                  title: event.target.value,
+                }))
+              }
+              placeholder="Search title"
+              value={filters.title}
+            />
+          </div>
+
+          <div className="grid gap-2">
+            <Label htmlFor="work-log-month">Month</Label>
+            <Select
+              onValueChange={(month) =>
+                setFilters((value) => ({
+                  ...value,
+                  month,
+                }))
+              }
+              value={filters.month}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent position="popper">
+                <SelectGroup>
+                  {monthOptions.map((month) => (
+                    <SelectItem key={month.value} value={month.value}>
+                      {month.label}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="grid gap-2">
+            <Label htmlFor="work-log-year">Year</Label>
+            <Select
+              onValueChange={(year) =>
+                setFilters((value) => ({
+                  ...value,
+                  year,
+                }))
+              }
+              value={filters.year}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent position="popper">
+                <SelectGroup>
+                  {yearOption.map((year) => (
+                    <SelectItem key={year.value} value={year.value}>
+                      {year.label}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <Button
+            className="w-full lg:w-auto"
+            isLoading={isLoading}
+            type="submit"
+          >
+            <SearchIcon aria-hidden="true" data-icon="inline-start" />
+            Search
+          </Button>
+        </form>
+
         {isLoading ? (
-          <div className="px-4 py-6 text-sm text-muted-foreground">
-            Loading work logs...
+          <div className="px-4 py-6 text-sm text-muted-foreground flex items-center justify-center">
+            <LineMdLoadingLoop className="w-10 h-10" />
           </div>
         ) : errorMessage ? (
           <div className="px-4 py-6 text-sm text-destructive">
@@ -118,7 +268,6 @@ export const WorkLogsPage = () => {
                 <TableHead>Mood</TableHead>
                 <TableHead>Productivity</TableHead>
                 <TableHead>Tags</TableHead>
-                <TableHead>Status</TableHead>
                 <TableHead>Logged Date</TableHead>
               </TableRow>
             </TableHeader>
@@ -143,11 +292,6 @@ export const WorkLogsPage = () => {
                       ))}
                     </div>
                   </TableCell>
-                  <TableCell>
-                    <span className="rounded-md bg-secondary px-2 py-0.5 text-xs text-secondary-foreground">
-                      {log.is_draft ? "Draft" : "Published"}
-                    </span>
-                  </TableCell>
                   <TableCell>{formatWorkLogDate(log.date_logged)}</TableCell>
                 </TableRow>
               ))}
@@ -167,7 +311,7 @@ export const WorkLogsPage = () => {
           <div className="flex items-center justify-center gap-2">
             <Button
               aria-label="Previous page"
-              disabled={currentPage <= 1}
+              disabled={currentPage <= 1 || isLoading}
               onClick={goToPreviousPage}
               size="icon-sm"
               type="button"
@@ -180,7 +324,7 @@ export const WorkLogsPage = () => {
             </span>
             <Button
               aria-label="Next page"
-              disabled={currentPage >= totalPages}
+              disabled={currentPage >= totalPages || isLoading}
               onClick={goToNextPage}
               size="icon-sm"
               type="button"
@@ -194,7 +338,10 @@ export const WorkLogsPage = () => {
             <span>Items per page</span>
             <select
               className="h-8 rounded-md border border-input bg-background px-2 text-sm text-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
-              onChange={(event) => setItemPerPage(Number(event.target.value))}
+              disabled={isLoading}
+              onChange={(event) =>
+                updateItemPerPage(Number(event.target.value))
+              }
               value={itemPerPage}
             >
               {itemPerPageOptions.map((option) => (

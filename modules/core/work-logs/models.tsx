@@ -31,6 +31,14 @@ export type WorkLogsResponse = {
   data: WorkLogsData;
 };
 
+export type WorkLogsQuery = {
+  page?: number;
+  limit?: number;
+  title?: string;
+  month?: string;
+  year?: string;
+};
+
 export const emptyWorkLogs: WorkLogsData = {
   items: [],
   total_items: 0,
@@ -38,4 +46,4 @@ export const emptyWorkLogs: WorkLogsData = {
   current_page: 1,
 };
 
-export const itemPerPageOptions = [10, 20, 50] as const;
+export const itemPerPageOptions = [10, 20, 31] as const;
