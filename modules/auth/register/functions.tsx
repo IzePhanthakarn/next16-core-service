@@ -1,13 +1,15 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import axios, { AxiosError } from "axios";
-import { useState } from "react";
+import { AxiosError, isAxiosError } from "axios";
+import { useRouter } from "next/navigation";
 import { type SubmitHandler, useForm } from "react-hook-form";
 
-import { registerSchema, type RegisterFormValues } from "./models";
+import AUTH_API from "@/constants/api/auth";
+import apiClient from "@/lib/api-client";
+import { appToast } from "@/lib/toast";
 
-const registerUrl = "http://localhost:8080/auth/register";
+import { registerSchema, type RegisterFormValues } from "./models";
 
 export const getRegisterDefaultValues = (): RegisterFormValues => ({
   first_name: "",
@@ -19,7 +21,7 @@ export const getRegisterDefaultValues = (): RegisterFormValues => ({
 });
 
 export const getRegisterErrorMessage = (error: unknown) => {
-  if (axios.isAxiosError(error)) {
+  if (isAxiosError(error)) {
     const axiosError = error as AxiosError<{ message?: string; error?: string }>;
 
     return (
@@ -37,17 +39,13 @@ export const getRegisterErrorMessage = (error: unknown) => {
 };
 
 export const useRegisterForm = () => {
-  const [successMessage, setSuccessMessage] = useState("");
-  const [errorMessage, setErrorMessage] = useState("");
+  const router = useRouter();
   const form = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
     defaultValues: getRegisterDefaultValues(),
   });
 
   const onSubmit: SubmitHandler<RegisterFormValues> = async (values) => {
-    setSuccessMessage("");
-    setErrorMessage("");
-
     try {
       const payload = {
         first_name: values.first_name,
@@ -57,25 +55,22 @@ export const useRegisterForm = () => {
         secret_word: values.secret_word,
       };
 
-      await axios.post(registerUrl, payload);
-      setSuccessMessage("Register success.");
+      await apiClient.post(AUTH_API.REGISTER, payload);
       form.reset(getRegisterDefaultValues());
+      appToast.success("Register success.");
+      router.push("/login");
     } catch (error) {
-      setErrorMessage(getRegisterErrorMessage(error));
+      appToast.error(getRegisterErrorMessage(error));
     }
   };
 
   const resetForm = () => {
-    setSuccessMessage("");
-    setErrorMessage("");
     form.reset(getRegisterDefaultValues());
   };
 
   return {
-    errorMessage,
     form,
     onSubmit,
     resetForm,
-    successMessage,
   };
 };

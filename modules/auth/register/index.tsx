@@ -14,7 +14,7 @@ import Link from "next/link";
 import { useRegisterForm } from "./functions";
 
 export const RegisterPage = () => {
-  const { errorMessage, form, onSubmit, successMessage } = useRegisterForm();
+  const { form, onSubmit } = useRegisterForm();
   const {
     formState: { errors, isSubmitting },
     handleSubmit,
@@ -82,7 +82,7 @@ export const RegisterPage = () => {
           <Input
             id="password"
             type="password"
-            placeholder="At least 6 characters"
+            placeholder="Enter your password"
             aria-invalid={!!errors.password}
             {...register("password")}
           />
@@ -116,26 +116,14 @@ export const RegisterPage = () => {
           <FieldError errors={[errors.secret_word]} />
         </Field>
 
-        {successMessage ? (
-          <p className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700">
-            {successMessage}
-          </p>
-        ) : null}
-
-        {errorMessage ? (
-          <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
-            {errorMessage}
-          </p>
-        ) : null}
-
         <div className="flex flex-col items-center gap-3 pt-5">
           <Button
             className="h-12 w-full max-w-xs rounded-sm bg-gradient-to-tr from-red-600 to-pink-500 px-8 text-sm font-semibold tracking-[0.25em] text-white shadow-md shadow-pink-500/20 hover:from-red-500 hover:to-pink-400"
             size="lg"
             type="submit"
-            disabled={isSubmitting}
+            isLoading={isSubmitting}
           >
-            {isSubmitting ? "CREATING..." : "CREATE ACCOUNT"}
+            CREATE ACCOUNT
           </Button>
 
           <p className="text-center text-sm text-muted-foreground">
