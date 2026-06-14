@@ -4,10 +4,19 @@ import { LogOutIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import { Button } from "@/components/ui/button";
+import { Button, type buttonVariants } from "@/components/ui/button";
 import { appToast } from "@/lib/toast";
+import { cn } from "@/lib/utils";
+import type { VariantProps } from "class-variance-authority";
 
-export const LogoutButton = () => {
+type LogoutButtonProps = VariantProps<typeof buttonVariants> & {
+  className?: string;
+};
+
+export const LogoutButton = ({
+  className,
+  variant = "outline",
+}: LogoutButtonProps) => {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -31,10 +40,11 @@ export const LogoutButton = () => {
 
   return (
     <Button
+      className={cn(className)}
       isLoading={isLoading}
       onClick={handleLogout}
       type="button"
-      variant="outline"
+      variant={variant}
     >
       <LogOutIcon aria-hidden="true" className="size-4" />
       Logout

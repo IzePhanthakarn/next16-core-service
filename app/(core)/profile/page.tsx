@@ -1,22 +1,26 @@
-import { formatUserValue, getCurrentUser } from "@/lib/current-user";
+import {
+  formatUserValue,
+  getCurrentUser,
+  getUserDisplayName,
+} from "@/lib/current-user";
 
-export const DashboardPage = async () => {
+export default async function ProfilePage() {
   const user = await getCurrentUser();
   const entries = Object.entries(user);
 
   return (
     <section className="mx-auto flex w-full max-w-5xl flex-col gap-6">
       <div className="space-y-1">
-        <p className="text-sm font-medium text-primary">Account</p>
-        <h1 className="text-2xl font-semibold">Dashboard</h1>
+        <p className="text-sm font-medium text-primary">Profile</p>
+        <h1 className="text-2xl font-semibold">{getUserDisplayName(user)}</h1>
         <p className="text-sm text-muted-foreground">
-          Your current profile from the authenticated API.
+          Your account details from the authenticated API.
         </p>
       </div>
 
       <div className="overflow-hidden rounded-lg border bg-card">
         <div className="border-b px-4 py-3">
-          <h2 className="text-base font-semibold">My Profile</h2>
+          <h2 className="text-base font-semibold">User Details</h2>
         </div>
         <dl className="divide-y">
           {entries.length ? (
@@ -38,4 +42,4 @@ export const DashboardPage = async () => {
       </div>
     </section>
   );
-};
+}
