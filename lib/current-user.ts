@@ -1,9 +1,15 @@
+import { isAxiosError } from "axios";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { cache } from "react";
 
-import { ACCESS_TOKEN_COOKIE_NAME } from "@/lib/auth-token";
-import { getApiBaseUrl } from "@/lib/api-url";
+import AUTH_API from "@/constants/api/auth";
+import apiClient from "@/lib/api-client";
+import {
+  ACCESS_TOKEN_COOKIE_NAME,
+  REFRESH_TOKEN_COOKIE_NAME,
+  type AuthTokenResponse,
+} from "@/lib/auth-token";
 
 export type UserProfile = Record<string, unknown>;
 
@@ -12,38 +18,71 @@ type ApiResponse<T> = {
   message: string;
 };
 
-export const getCurrentUser = cache(async () => {
-  const token = (await cookies()).get(ACCESS_TOKEN_COOKIE_NAME)?.value;
-
-  if (!token) {
-    redirect("/login");
-  }
-
-  const response = await fetch(`${getApiBaseUrl()}/users/me`, {
-    method: "GET",
+const getCurrentUserWithToken = async (token: string) => {
+  const response = await apiClient.get<ApiResponse<UserProfile>>("/users/me", {
     headers: {
       Authorization: `Bearer ${token}`,
     },
-    cache: "no-store",
   });
 
-  if (response.status === 401) {
-    redirect("/login");
-  }
-
-  if (!response.ok) {
-    throw new Error("Failed to load current user.");
-  }
-
-  const responseData = (await response.json()) as ApiResponse<UserProfile>;
-
-  if (!responseData.data) {
+  if (!response.data.data) {
     throw new Error(
-      responseData.message || "Current user data was not returned."
+      response.data.message || "Current user data was not returned."
     );
   }
 
-  return responseData.data;
+  return response.data.data;
+};
+
+const refreshAccessToken = async (refreshToken: string) => {
+  const response = await apiClient.post<ApiResponse<AuthTokenResponse>>(
+    AUTH_API.REFRESH,
+    {
+      refresh_token: refreshToken,
+    }
+  );
+
+  return response.data.data?.access_token || "";
+};
+
+export const getCurrentUser = cache(async () => {
+  const cookieStore = await cookies();
+  const token = cookieStore.get(ACCESS_TOKEN_COOKIE_NAME)?.value;
+  const refreshToken = cookieStore.get(REFRESH_TOKEN_COOKIE_NAME)?.value;
+
+  if (!token && !refreshToken) {
+    redirect("/login");
+  }
+
+  if (token) {
+    try {
+      return await getCurrentUserWithToken(token);
+    } catch (error) {
+      if (!isAxiosError(error) || error.response?.status !== 401) {
+        throw new Error("Failed to load current user.");
+      }
+    }
+  }
+
+  if (!refreshToken) {
+    redirect("/login");
+  }
+
+  try {
+    const refreshedToken = await refreshAccessToken(refreshToken);
+
+    if (!refreshedToken) {
+      redirect("/login");
+    }
+
+    return await getCurrentUserWithToken(refreshedToken);
+  } catch (error) {
+    if (isAxiosError(error) && error.response?.status === 401) {
+      redirect("/login");
+    }
+
+    throw new Error("Failed to load current user.");
+  }
 });
 
 export const formatUserValue = (value: unknown) => {

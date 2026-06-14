@@ -1,7 +1,6 @@
 import { isAxiosError } from "axios";
 
 import apiClient from "@/lib/api-client";
-import { ACCESS_TOKEN_COOKIE_NAME } from "@/lib/auth-token";
 
 import { type WorkLogsQuery, type WorkLogsResponse } from "./models";
 
@@ -21,30 +20,8 @@ export const formatWorkLogTime = (value: string) =>
     timeStyle: "short",
   }).format(new Date(value));
 
-const getCookieValue = (name: string) => {
-  if (typeof document === "undefined") {
-    return "";
-  }
-
-  return (
-    document.cookie
-      .split("; ")
-      .find((cookie) => cookie.startsWith(`${name}=`))
-      ?.split("=")[1] || ""
-  );
-};
-
 export const getWorkLogs = async (query: WorkLogsQuery = {}) => {
-  const token = decodeURIComponent(getCookieValue(ACCESS_TOKEN_COOKIE_NAME));
-
-  if (!token) {
-    throw new Error("Unauthorized");
-  }
-
   const response = await apiClient.get<WorkLogsResponse>("/work-logs", {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
     params: query,
   });
 
