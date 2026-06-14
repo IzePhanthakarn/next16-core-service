@@ -1,11 +1,24 @@
 "use client";
 
-import { ChevronLeftIcon, ChevronRightIcon, SearchIcon } from "lucide-react";
+import {
+  CalendarIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  PlusIcon,
+  RotateCcwIcon,
+  SearchIcon,
+} from "lucide-react";
 import { type FormEvent, useEffect, useMemo, useState } from "react";
 
+import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import {
   Table,
   TableBody,
@@ -14,8 +27,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Textarea } from "@/components/ui/textarea";
 
 import {
+  createWorkLog,
   formatWorkLogDate,
   getWorkLogs,
   getWorkLogsErrorMessage,
@@ -28,7 +43,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Sheet,
+  SheetContent,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { monthOptions, yearOption } from "@/constants/datetime";
+import { appToast } from "@/lib/toast";
+import { cn } from "@/lib/utils";
 import {
   emptyWorkLogs,
   itemPerPageOptions,
@@ -43,6 +68,15 @@ type WorkLogsFilterState = {
   year: string;
 };
 
+type AddWorkLogFormState = {
+  content: string;
+  dateLogged?: Date;
+  moodScore: string;
+  productivityScore: string;
+  tags: string;
+  title: string;
+};
+
 const getDefaultFilters = (): WorkLogsFilterState => {
   const today = new Date();
 
@@ -55,11 +89,53 @@ const getDefaultFilters = (): WorkLogsFilterState => {
 
 const defaultFilters = getDefaultFilters();
 
+const getDefaultAddWorkLogForm = (): AddWorkLogFormState => ({
+  content: "",
+  dateLogged: new Date(),
+  moodScore: "1",
+  productivityScore: "1",
+  tags: "",
+  title: "",
+});
+
 const buildFilterQuery = (filters: WorkLogsFilterState) => ({
   ...(filters.title.trim() ? { title: filters.title.trim() } : {}),
   ...(filters.month.trim() ? { month: filters.month.trim() } : {}),
   ...(filters.year.trim() ? { year: filters.year.trim() } : {}),
 });
+
+const formatDateForApi = (date: Date) => {
+  const year = date.getFullYear();
+  const month = (date.getMonth() + 1).toString().padStart(2, "0");
+  const day = date.getDate().toString().padStart(2, "0");
+  const hours = date.getHours().toString().padStart(2, "0");
+  const minutes = date.getMinutes().toString().padStart(2, "0");
+  const seconds = date.getSeconds().toString().padStart(2, "0");
+  const milliseconds = date.getMilliseconds().toString().padStart(3, "0");
+  const timezoneOffset = -date.getTimezoneOffset();
+  const timezoneSign = timezoneOffset >= 0 ? "+" : "-";
+  const timezoneHours = Math.floor(Math.abs(timezoneOffset) / 60)
+    .toString()
+    .padStart(2, "0");
+  const timezoneMinutes = (Math.abs(timezoneOffset) % 60)
+    .toString()
+    .padStart(2, "0");
+
+  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}.${milliseconds} ${timezoneSign}${timezoneHours}${timezoneMinutes}`;
+};
+
+const formatDatePickerLabel = (date?: Date) =>
+  date
+    ? new Intl.DateTimeFormat("en-EN", {
+        dateStyle: "medium",
+      }).format(date)
+    : "Select date";
+
+const getTagsFromText = (value: string) =>
+  value
+    .split(",")
+    .map((tag) => tag.trim())
+    .filter(Boolean);
 
 const useWorkLogs = () => {
   const [workLogs, setWorkLogs] = useState<WorkLogsData>(emptyWorkLogs);
@@ -70,6 +146,7 @@ const useWorkLogs = () => {
     useState<WorkLogsFilterState>(defaultFilters);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
+  const [reloadKey, setReloadKey] = useState(0);
 
   const query = useMemo<WorkLogsQuery>(
     () => ({
@@ -80,6 +157,10 @@ const useWorkLogs = () => {
     [appliedFilters, currentPage, itemPerPage],
   );
 
+  const reloadWorkLogs = () => {
+    setReloadKey((value) => value + 1);
+  };
+
   useEffect(() => {
     const loadWorkLogs = async () => {
       setIsLoading(true);
@@ -87,7 +168,6 @@ const useWorkLogs = () => {
 
       try {
         const data = await getWorkLogs(query);
-
         setWorkLogs(data);
         if (data.current_page && data.current_page !== currentPage) {
           setCurrentPage(data.current_page);
@@ -100,7 +180,7 @@ const useWorkLogs = () => {
     };
 
     void loadWorkLogs();
-  }, [currentPage, query]);
+  }, [currentPage, query, reloadKey]);
 
   const totalPages = workLogs.total_pages || 1;
   const handleSearch = (event: FormEvent<HTMLFormElement>) => {
@@ -130,11 +210,229 @@ const useWorkLogs = () => {
     handleSearch,
     isLoading,
     itemPerPage,
+    reloadWorkLogs,
     setFilters,
     updateItemPerPage,
     totalPages,
     workLogs,
   };
+};
+
+type DateLoggedPickerProps = {
+  date?: Date;
+  onSelect: (date?: Date) => void;
+};
+
+const DateLoggedPicker = ({ date, onSelect }: DateLoggedPickerProps) => {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          className={cn(
+            "w-full justify-start text-left font-normal",
+            !date && "text-muted-foreground"
+          )}
+          type="button"
+          variant="outline"
+        >
+          <CalendarIcon aria-hidden="true" data-icon="inline-start" />
+          {formatDatePickerLabel(date)}
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent align="start" className="w-auto">
+        <Calendar
+          mode="single"
+          selected={date}
+          onSelect={(selectedDate) => {
+            onSelect(selectedDate);
+            setOpen(false);
+          }}
+        />
+      </PopoverContent>
+    </Popover>
+  );
+};
+
+type AddWorkLogSheetProps = {
+  onCreated: () => void;
+};
+
+const AddWorkLogSheet = ({ onCreated }: AddWorkLogSheetProps) => {
+  const [open, setOpen] = useState(false);
+  const [form, setForm] = useState<AddWorkLogFormState>(
+    getDefaultAddWorkLogForm
+  );
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const resetForm = () => {
+    setForm(getDefaultAddWorkLogForm());
+  };
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (!form.title.trim() || !form.content.trim() || !form.dateLogged) {
+      appToast.error("Please fill title, content, and date logged.");
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      await createWorkLog({
+        content: form.content.trim(),
+        date_logged: formatDateForApi(form.dateLogged),
+        mood_score: Number(form.moodScore),
+        productivity_score: Number(form.productivityScore),
+        tags: getTagsFromText(form.tags),
+        title: form.title.trim(),
+      });
+
+      appToast.success("Work log added.");
+      resetForm();
+      setOpen(false);
+      onCreated();
+    } catch (error) {
+      appToast.error(getWorkLogsErrorMessage(error));
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <Sheet open={open} onOpenChange={setOpen}>
+      <SheetTrigger asChild>
+        <Button type="button" variant="success">
+          <PlusIcon aria-hidden="true" data-icon="inline-start" />
+          Add
+        </Button>
+      </SheetTrigger>
+      <SheetContent className="w-full sm:max-w-lg">
+        <SheetHeader className="border-b pr-12">
+          <SheetTitle>Add work logs</SheetTitle>
+        </SheetHeader>
+
+        <form className="flex min-h-0 flex-1 flex-col" onSubmit={handleSubmit}>
+          <div className="grid flex-1 gap-4 overflow-y-auto px-4 py-2">
+            <div className="grid gap-2">
+              <Label htmlFor="add-work-log-title">Title</Label>
+              <Input
+                id="add-work-log-title"
+                onChange={(event) =>
+                  setForm((value) => ({
+                    ...value,
+                    title: event.target.value,
+                  }))
+                }
+                placeholder="Work log title"
+                value={form.title}
+              />
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="add-work-log-content">Content</Label>
+              <Textarea
+                className="min-h-32 resize-none"
+                id="add-work-log-content"
+                onChange={(event) =>
+                  setForm((value) => ({
+                    ...value,
+                    content: event.target.value,
+                  }))
+                }
+                placeholder="What did you work on?"
+                value={form.content}
+              />
+            </div>
+
+            <div className="grid gap-2">
+              <Label>Date logged</Label>
+              <DateLoggedPicker
+                date={form.dateLogged}
+                onSelect={(dateLogged) =>
+                  setForm((value) => ({
+                    ...value,
+                    dateLogged,
+                  }))
+                }
+              />
+            </div>
+
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="grid gap-2">
+                <Label htmlFor="add-work-log-mood">Mood score</Label>
+                <Input
+                  id="add-work-log-mood"
+                  max={5}
+                  min={1}
+                  onChange={(event) =>
+                    setForm((value) => ({
+                      ...value,
+                      moodScore: event.target.value,
+                    }))
+                  }
+                  type="number"
+                  value={form.moodScore}
+                />
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="add-work-log-productivity">
+                  Productivity score
+                </Label>
+                <Input
+                  id="add-work-log-productivity"
+                  max={5}
+                  min={1}
+                  onChange={(event) =>
+                    setForm((value) => ({
+                      ...value,
+                      productivityScore: event.target.value,
+                    }))
+                  }
+                  type="number"
+                  value={form.productivityScore}
+                />
+              </div>
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="add-work-log-tags">Tags</Label>
+              <Input
+                id="add-work-log-tags"
+                onChange={(event) =>
+                  setForm((value) => ({
+                    ...value,
+                    tags: event.target.value,
+                  }))
+                }
+                placeholder="frontend, api, planning"
+                value={form.tags}
+              />
+            </div>
+          </div>
+
+          <SheetFooter className="border-t sm:flex-row sm:justify-end">
+            <Button
+              disabled={isSubmitting}
+              onClick={resetForm}
+              type="button"
+              variant="outline"
+            >
+              <RotateCcwIcon aria-hidden="true" data-icon="inline-start" />
+              Reset form
+            </Button>
+            <Button isLoading={isSubmitting} type="submit" variant="success">
+              <PlusIcon aria-hidden="true" data-icon="inline-start" />
+              Add work log
+            </Button>
+          </SheetFooter>
+        </form>
+      </SheetContent>
+    </Sheet>
+  );
 };
 
 export const WorkLogsPage = () => {
@@ -147,6 +445,7 @@ export const WorkLogsPage = () => {
     handleSearch,
     isLoading,
     itemPerPage,
+    reloadWorkLogs,
     setFilters,
     updateItemPerPage,
     totalPages,
@@ -154,12 +453,15 @@ export const WorkLogsPage = () => {
   } = useWorkLogs();
   return (
     <section className="mx-auto flex w-full max-w-5xl flex-col gap-6">
-      <div className="space-y-1">
-        <p className="text-sm font-medium text-primary">Work Logs</p>
-        <h1 className="text-2xl font-semibold">Work Logs</h1>
-        <p className="text-sm text-muted-foreground">
-          Track daily work activity and service notes.
-        </p>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div className="space-y-1">
+          <p className="text-sm font-medium text-primary">Work Logs</p>
+          <h1 className="text-2xl font-semibold">Work Logs</h1>
+          <p className="text-sm text-muted-foreground">
+            Track daily work activity and service notes.
+          </p>
+        </div>
+        <AddWorkLogSheet onCreated={reloadWorkLogs} />
       </div>
 
       <div className="overflow-hidden rounded-lg border bg-card">

@@ -2,7 +2,19 @@ import { isAxiosError } from "axios";
 
 import apiClient from "@/lib/api-client";
 
-import { type WorkLogsQuery, type WorkLogsResponse } from "./models";
+import {
+  type CreateWorkLogInput,
+  type WorkLog,
+  type WorkLogsQuery,
+  type WorkLogsResponse,
+} from "./models";
+
+type CreateWorkLogResponse = {
+  status: string;
+  code: number;
+  message: string;
+  data: WorkLog;
+};
 
 export const formatWorkLogDateTime = (value: string) =>
   new Intl.DateTimeFormat("en-EN", {
@@ -24,6 +36,15 @@ export const getWorkLogs = async (query: WorkLogsQuery = {}) => {
   const response = await apiClient.get<WorkLogsResponse>("/work-logs", {
     params: query,
   });
+
+  return response.data.data;
+};
+
+export const createWorkLog = async (input: CreateWorkLogInput) => {
+  const response = await apiClient.post<CreateWorkLogResponse>(
+    "/work-logs",
+    input
+  );
 
   return response.data.data;
 };

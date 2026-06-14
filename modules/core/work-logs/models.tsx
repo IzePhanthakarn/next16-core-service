@@ -39,6 +39,15 @@ export type WorkLogsQuery = {
   year?: string;
 };
 
+export type CreateWorkLogInput = {
+  content: string;
+  date_logged: string;
+  mood_score: number;
+  productivity_score: number;
+  tags: string[];
+  title: string;
+};
+
 export const emptyWorkLogs: WorkLogsData = {
   items: [],
   total_items: 0,
