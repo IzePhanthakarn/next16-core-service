@@ -1,15 +1,19 @@
 "use client";
 
 import {
-  ChevronLeftIcon,
-  ChevronRightIcon,
   EyeIcon,
   PencilIcon,
   PlusIcon,
   SearchIcon,
   Trash2Icon,
 } from "lucide-react";
-import { type FormEvent, useEffect, useMemo, useState } from "react";
+import {
+  type FormEvent,
+  type ReactNode,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 
 import { LineMdLoadingLoop } from "@/assets/icons/LineMdLoadingLoop";
 import { Button } from "@/components/ui/button";
@@ -25,6 +29,15 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 import {
   Select,
   SelectContent,
@@ -86,6 +99,49 @@ const buildFilterQuery = (filters: WorkLogsFilterState) => ({
   ...(filters.year.trim() ? { year: filters.year.trim() } : {}),
 });
 
+const getPaginationItems = (currentPage: number, totalPages: number) => {
+  if (totalPages <= 7) {
+    return Array.from({ length: totalPages }, (_, index) => index + 1);
+  }
+
+  const pages = new Set([1, totalPages, currentPage]);
+
+  if (currentPage > 1) {
+    pages.add(currentPage - 1);
+  }
+
+  if (currentPage < totalPages) {
+    pages.add(currentPage + 1);
+  }
+
+  if (currentPage <= 4) {
+    pages.add(2);
+    pages.add(3);
+    pages.add(4);
+    pages.add(5);
+  }
+
+  if (currentPage >= totalPages - 3) {
+    pages.add(totalPages - 4);
+    pages.add(totalPages - 3);
+    pages.add(totalPages - 2);
+    pages.add(totalPages - 1);
+  }
+
+  return [...pages]
+    .filter((page) => page >= 1 && page <= totalPages)
+    .sort((firstPage, secondPage) => firstPage - secondPage)
+    .flatMap((page, index, sortedPages) => {
+      const previousPage = sortedPages[index - 1];
+
+      if (previousPage && page - previousPage > 1) {
+        return [`ellipsis-${previousPage}-${page}`, page];
+      }
+
+      return [page];
+    });
+};
+
 const useWorkLogs = () => {
   const [workLogs, setWorkLogs] = useState<WorkLogsData>(emptyWorkLogs);
   const [currentPage, setCurrentPage] = useState(emptyWorkLogs.current_page);
@@ -144,6 +200,10 @@ const useWorkLogs = () => {
     setCurrentPage(1);
   };
 
+  const goToPage = (page: number) => {
+    setCurrentPage(Math.min(Math.max(page, 1), totalPages));
+  };
+
   const goToPreviousPage = () => {
     setCurrentPage((page) => Math.max(page - 1, 1));
   };
@@ -156,6 +216,7 @@ const useWorkLogs = () => {
     errorMessage,
     filters,
     goToNextPage,
+    goToPage,
     goToPreviousPage,
     handleSearch,
     isLoading,
@@ -210,9 +271,9 @@ const DeleteWorkLogDialog = ({
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Delete work log</DialogTitle>
-          <DialogDescription>
-            Are you sure you want to delete {workLog.title}? This action cannot
-            be undone.
+          <DialogDescription className="text-center pb-3 pt-5">
+            Are you sure you want to delete {workLog.title}? <br />
+            This action cannot be undone.
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
@@ -242,6 +303,7 @@ export const WorkLogsPage = () => {
     errorMessage,
     filters,
     goToNextPage,
+    goToPage,
     goToPreviousPage,
     handleSearch,
     isLoading,
@@ -252,6 +314,110 @@ export const WorkLogsPage = () => {
     totalPages,
     workLogs,
   } = useWorkLogs();
+  const paginationItems = getPaginationItems(currentPage, totalPages);
+  const previousPageDisabled = currentPage <= 1 || isLoading;
+  const nextPageDisabled = currentPage >= totalPages || isLoading;
+  let workLogsContent: ReactNode;
+
+  if (isLoading) {
+    workLogsContent = (
+      <div className="flex items-center justify-center px-4 py-6 text-sm text-muted-foreground h-[489.5px]">
+        <LineMdLoadingLoop className="h-10 w-10" />
+      </div>
+    );
+  } else if (errorMessage) {
+    workLogsContent = (
+      <div className="px-4 py-6 flex justify-center items-center text-sm text-destructive h-[489.5px]">
+        {errorMessage}
+      </div>
+    );
+  } else if (workLogs.items.length) {
+    workLogsContent = (
+      <Table classNameContainer="min-h-[489.5px]">
+        <TableHeader>
+          <TableRow>
+            <TableHead>Title</TableHead>
+            <TableHead className="text-center">Mood</TableHead>
+            <TableHead className="text-center">Productivity</TableHead>
+            <TableHead className="text-center">Tags</TableHead>
+            <TableHead className="text-center">Logged Date</TableHead>
+            <TableHead className="text-center">Action</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {workLogs.items.map((log) => (
+            <TableRow key={log.id}>
+              <TableCell className="font-medium">{log.title}</TableCell>
+              <TableCell className="text-center">
+                {getMoodScoreLabel(log.mood_score)}
+              </TableCell>
+              <TableCell className="text-center">
+                {getProductivityScoreLabel(log.productivity_score)}
+              </TableCell>
+              <TableCell>
+                <div className="flex justify-center max-w-[240px] flex-wrap gap-1">
+                  {log.tags.map((tag) => (
+                    <span
+                      className="rounded-md bg-secondary px-2 py-0.5 text-xs text-secondary-foreground"
+                      key={`${tag.log_id}-${tag.work_tag}`}
+                    >
+                      {tag.work_tag}
+                    </span>
+                  ))}
+                </div>
+              </TableCell>
+              <TableCell className="text-center">
+                {formatWorkLogDate(log.date_logged)}
+              </TableCell>
+              <TableCell>
+                <div className="flex justify-center gap-2">
+                  <WorkLogSheet
+                    mode="view"
+                    trigger={
+                      <Button
+                        aria-label="View work log"
+                        size="icon-sm"
+                        type="button"
+                        variant="outline"
+                      >
+                        <EyeIcon aria-hidden="true" />
+                      </Button>
+                    }
+                    workLog={log}
+                  />
+                  <WorkLogSheet
+                    mode="edit"
+                    onSaved={reloadWorkLogs}
+                    trigger={
+                      <Button
+                        aria-label="Edit work log"
+                        size="icon-sm"
+                        type="button"
+                        variant="warning"
+                      >
+                        <PencilIcon aria-hidden="true" />
+                      </Button>
+                    }
+                    workLog={log}
+                  />
+                  <DeleteWorkLogDialog
+                    onDeleted={reloadWorkLogs}
+                    workLog={log}
+                  />
+                </div>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    );
+  } else {
+    workLogsContent = (
+      <div className="px-4 py-6 text-sm text-muted-foreground min-h-[489.5px] flex items-center justify-center">
+        No work logs yet.
+      </div>
+    );
+  }
 
   return (
     <section className="mx-auto flex w-full max-w-5xl flex-col gap-6">
@@ -368,128 +534,70 @@ export const WorkLogsPage = () => {
           </Button>
         </form>
 
-        {isLoading ? (
-          <div className="flex items-center justify-center px-4 py-6 text-sm text-muted-foreground h-[489.5px]">
-            <LineMdLoadingLoop className="h-10 w-10" />
-          </div>
-        ) : errorMessage ? (
-          <div className="px-4 py-6 flex justify-center items-center text-sm text-destructive h-[489.5px]">
-            {errorMessage}
-          </div>
-        ) : workLogs.items.length ? (
-          <Table classNameContainer="min-h-[489.5px]">
-            <TableHeader>
-              <TableRow>
-                <TableHead>Title</TableHead>
-                <TableHead className="text-center">Mood</TableHead>
-                <TableHead className="text-center">Productivity</TableHead>
-                <TableHead className="text-center">Tags</TableHead>
-                <TableHead className="text-center">Logged Date</TableHead>
-                <TableHead className="text-center">Action</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {workLogs.items.map((log) => (
-                <TableRow key={log.id}>
-                  <TableCell className="font-medium">{log.title}</TableCell>
-                  <TableCell className="text-center">
-                    {getMoodScoreLabel(log.mood_score)}
-                  </TableCell>
-                  <TableCell className="text-center">
-                    {getProductivityScoreLabel(log.productivity_score)}
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex justify-center max-w-[240px] flex-wrap gap-1">
-                      {log.tags.map((tag) => (
-                        <span
-                          className="rounded-md bg-secondary px-2 py-0.5 text-xs text-secondary-foreground"
-                          key={`${tag.log_id}-${tag.work_tag}`}
-                        >
-                          {tag.work_tag}
-                        </span>
-                      ))}
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-center">
-                    {formatWorkLogDate(log.date_logged)}
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex justify-center gap-2">
-                      <WorkLogSheet
-                        mode="view"
-                        trigger={
-                          <Button
-                            aria-label="View work log"
-                            size="icon-sm"
-                            type="button"
-                            variant="outline"
-                          >
-                            <EyeIcon aria-hidden="true" />
-                          </Button>
-                        }
-                        workLog={log}
-                      />
-                      <WorkLogSheet
-                        mode="edit"
-                        onSaved={reloadWorkLogs}
-                        trigger={
-                          <Button
-                            aria-label="Edit work log"
-                            size="icon-sm"
-                            type="button"
-                            variant="warning"
-                          >
-                            <PencilIcon aria-hidden="true" />
-                          </Button>
-                        }
-                        workLog={log}
-                      />
-                      <DeleteWorkLogDialog
-                        onDeleted={reloadWorkLogs}
-                        workLog={log}
-                      />
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        ) : (
-          <div className="px-4 py-6 text-sm text-muted-foreground min-h-[489.5px] flex items-center justify-center">
-            No work logs yet.
-          </div>
-        )}
+        {workLogsContent}
 
         <div className="grid gap-3 border-t px-4 py-3 md:grid-cols-[1fr_auto_1fr] md:items-center">
           <div className="hidden text-sm text-muted-foreground md:block">
             Page {currentPage} of {totalPages}
           </div>
 
-          <div className="flex items-center justify-center gap-2">
-            <Button
-              aria-label="Previous page"
-              disabled={currentPage <= 1 || isLoading}
-              onClick={goToPreviousPage}
-              size="icon-sm"
-              type="button"
-              variant="outline"
-            >
-              <ChevronLeftIcon aria-hidden="true" />
-            </Button>
-            <span className="min-w-20 text-center text-sm text-muted-foreground">
-              {currentPage} / {totalPages}
-            </span>
-            <Button
-              aria-label="Next page"
-              disabled={currentPage >= totalPages || isLoading}
-              onClick={goToNextPage}
-              size="icon-sm"
-              type="button"
-              variant="outline"
-            >
-              <ChevronRightIcon aria-hidden="true" />
-            </Button>
-          </div>
+          <Pagination>
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious
+                  aria-disabled={previousPageDisabled}
+                  className={
+                    previousPageDisabled ? "pointer-events-none opacity-50" : ""
+                  }
+                  href="#"
+                  onClick={(event) => {
+                    event.preventDefault();
+                    goToPreviousPage();
+                  }}
+                  tabIndex={previousPageDisabled ? -1 : undefined}
+                  text=""
+                />
+              </PaginationItem>
+
+              {paginationItems.map((item) => (
+                <PaginationItem key={item}>
+                  {typeof item === "number" ? (
+                    <PaginationLink
+                      aria-disabled={isLoading}
+                      className={isLoading ? "pointer-events-none opacity-50" : ""}
+                      href="#"
+                      isActive={item === currentPage}
+                      onClick={(event) => {
+                        event.preventDefault();
+                        goToPage(item);
+                      }}
+                      tabIndex={isLoading ? -1 : undefined}
+                    >
+                      {item}
+                    </PaginationLink>
+                  ) : (
+                    <PaginationEllipsis />
+                  )}
+                </PaginationItem>
+              ))}
+
+              <PaginationItem>
+                <PaginationNext
+                  aria-disabled={nextPageDisabled}
+                  className={
+                    nextPageDisabled ? "pointer-events-none opacity-50" : ""
+                  }
+                  href="#"
+                  onClick={(event) => {
+                    event.preventDefault();
+                    goToNextPage();
+                  }}
+                  tabIndex={nextPageDisabled ? -1 : undefined}
+                  text=""
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
 
           <label className="flex items-center justify-center gap-2 text-sm text-muted-foreground md:justify-self-end">
             <span>Items per page</span>
