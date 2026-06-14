@@ -48,6 +48,10 @@ export type CreateWorkLogInput = {
   title: string;
 };
 
+export type UpdateWorkLogInput = CreateWorkLogInput & {
+  user_id: string;
+};
+
 export const emptyWorkLogs: WorkLogsData = {
   items: [],
   total_items: 0,

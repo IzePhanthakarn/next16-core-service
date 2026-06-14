@@ -1,9 +1,14 @@
 import { isAxiosError } from "axios";
 
+import {
+  moodScoreOptions,
+  productivityScoreOptions,
+} from "@/constants/worklogs";
 import apiClient from "@/lib/api-client";
 
 import {
   type CreateWorkLogInput,
+  type UpdateWorkLogInput,
   type WorkLog,
   type WorkLogsQuery,
   type WorkLogsResponse,
@@ -14,6 +19,14 @@ type CreateWorkLogResponse = {
   code: number;
   message: string;
   data: WorkLog;
+};
+
+type UpdateWorkLogResponse = CreateWorkLogResponse;
+
+type DeleteWorkLogResponse = {
+  status: string;
+  code: number;
+  message: string;
 };
 
 export const formatWorkLogDateTime = (value: string) =>
@@ -32,6 +45,17 @@ export const formatWorkLogTime = (value: string) =>
     timeStyle: "short",
   }).format(new Date(value));
 
+const getScoreOptionLabel = (
+  options: readonly { value: string; label: string }[],
+  value: number
+) => options.find((option) => option.value === value.toString())?.label || value.toString();
+
+export const getMoodScoreLabel = (value: number) =>
+  getScoreOptionLabel(moodScoreOptions, value);
+
+export const getProductivityScoreLabel = (value: number) =>
+  getScoreOptionLabel(productivityScoreOptions, value);
+
 export const getWorkLogs = async (query: WorkLogsQuery = {}) => {
   const response = await apiClient.get<WorkLogsResponse>("/work-logs", {
     params: query,
@@ -47,6 +71,23 @@ export const createWorkLog = async (input: CreateWorkLogInput) => {
   );
 
   return response.data.data;
+};
+
+export const updateWorkLog = async (id: string, input: UpdateWorkLogInput) => {
+  const response = await apiClient.put<UpdateWorkLogResponse>(
+    `/work-logs/${id}`,
+    input
+  );
+
+  return response.data.data;
+};
+
+export const deleteWorkLog = async (id: string) => {
+  const response = await apiClient.delete<DeleteWorkLogResponse>(
+    `/work-logs/${id}`
+  );
+
+  return response.data;
 };
 
 export const getWorkLogsErrorMessage = (error: unknown) => {

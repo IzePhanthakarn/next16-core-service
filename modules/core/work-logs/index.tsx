@@ -1,40 +1,30 @@
 "use client";
 
 import {
-  CalendarIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
+  EyeIcon,
+  PencilIcon,
   PlusIcon,
-  RotateCcwIcon,
   SearchIcon,
+  Trash2Icon,
 } from "lucide-react";
 import { type FormEvent, useEffect, useMemo, useState } from "react";
 
-import { Calendar } from "@/components/ui/calendar";
+import { LineMdLoadingLoop } from "@/assets/icons/LineMdLoadingLoop";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Textarea } from "@/components/ui/textarea";
-
-import {
-  createWorkLog,
-  formatWorkLogDate,
-  getWorkLogs,
-  getWorkLogsErrorMessage,
-} from "./functions";
 import {
   Select,
   SelectContent,
@@ -44,37 +34,38 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  Sheet,
-  SheetContent,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { monthOptions, yearOption } from "@/constants/datetime";
-import { appToast } from "@/lib/toast";
-import { cn } from "@/lib/utils";
+
+import {
+  deleteWorkLog,
+  formatWorkLogDate,
+  getMoodScoreLabel,
+  getProductivityScoreLabel,
+  getWorkLogs,
+  getWorkLogsErrorMessage,
+} from "./functions";
 import {
   emptyWorkLogs,
   itemPerPageOptions,
   type WorkLogsData,
   type WorkLogsQuery,
+  type WorkLog,
 } from "./models";
-import { LineMdLoadingLoop } from "@/assets/icons/LineMdLoadingLoop";
+import { WorkLogSheet } from "./WorkLogSheet";
+import { appToast } from "@/lib/toast";
+import { LucideLayoutDashboard } from "@/assets/icons/LucideLayoutDashboard";
 
 type WorkLogsFilterState = {
   title: string;
   month: string;
   year: string;
-};
-
-type AddWorkLogFormState = {
-  content: string;
-  dateLogged?: Date;
-  moodScore: string;
-  productivityScore: string;
-  tags: string;
-  title: string;
 };
 
 const getDefaultFilters = (): WorkLogsFilterState => {
@@ -89,53 +80,11 @@ const getDefaultFilters = (): WorkLogsFilterState => {
 
 const defaultFilters = getDefaultFilters();
 
-const getDefaultAddWorkLogForm = (): AddWorkLogFormState => ({
-  content: "",
-  dateLogged: new Date(),
-  moodScore: "1",
-  productivityScore: "1",
-  tags: "",
-  title: "",
-});
-
 const buildFilterQuery = (filters: WorkLogsFilterState) => ({
   ...(filters.title.trim() ? { title: filters.title.trim() } : {}),
   ...(filters.month.trim() ? { month: filters.month.trim() } : {}),
   ...(filters.year.trim() ? { year: filters.year.trim() } : {}),
 });
-
-const formatDateForApi = (date: Date) => {
-  const year = date.getFullYear();
-  const month = (date.getMonth() + 1).toString().padStart(2, "0");
-  const day = date.getDate().toString().padStart(2, "0");
-  const hours = date.getHours().toString().padStart(2, "0");
-  const minutes = date.getMinutes().toString().padStart(2, "0");
-  const seconds = date.getSeconds().toString().padStart(2, "0");
-  const milliseconds = date.getMilliseconds().toString().padStart(3, "0");
-  const timezoneOffset = -date.getTimezoneOffset();
-  const timezoneSign = timezoneOffset >= 0 ? "+" : "-";
-  const timezoneHours = Math.floor(Math.abs(timezoneOffset) / 60)
-    .toString()
-    .padStart(2, "0");
-  const timezoneMinutes = (Math.abs(timezoneOffset) % 60)
-    .toString()
-    .padStart(2, "0");
-
-  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}.${milliseconds} ${timezoneSign}${timezoneHours}${timezoneMinutes}`;
-};
-
-const formatDatePickerLabel = (date?: Date) =>
-  date
-    ? new Intl.DateTimeFormat("en-EN", {
-        dateStyle: "medium",
-      }).format(date)
-    : "Select date";
-
-const getTagsFromText = (value: string) =>
-  value
-    .split(",")
-    .map((tag) => tag.trim())
-    .filter(Boolean);
 
 const useWorkLogs = () => {
   const [workLogs, setWorkLogs] = useState<WorkLogsData>(emptyWorkLogs);
@@ -168,6 +117,7 @@ const useWorkLogs = () => {
 
       try {
         const data = await getWorkLogs(query);
+
         setWorkLogs(data);
         if (data.current_page && data.current_page !== currentPage) {
           setCurrentPage(data.current_page);
@@ -218,220 +168,71 @@ const useWorkLogs = () => {
   };
 };
 
-type DateLoggedPickerProps = {
-  date?: Date;
-  onSelect: (date?: Date) => void;
+type DeleteWorkLogDialogProps = {
+  onDeleted: () => void;
+  workLog: WorkLog;
 };
 
-const DateLoggedPicker = ({ date, onSelect }: DateLoggedPickerProps) => {
+const DeleteWorkLogDialog = ({
+  onDeleted,
+  workLog,
+}: DeleteWorkLogDialogProps) => {
   const [open, setOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
-  return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          className={cn(
-            "w-full justify-start text-left font-normal",
-            !date && "text-muted-foreground"
-          )}
-          type="button"
-          variant="outline"
-        >
-          <CalendarIcon aria-hidden="true" data-icon="inline-start" />
-          {formatDatePickerLabel(date)}
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent align="start" className="w-auto">
-        <Calendar
-          mode="single"
-          selected={date}
-          onSelect={(selectedDate) => {
-            onSelect(selectedDate);
-            setOpen(false);
-          }}
-        />
-      </PopoverContent>
-    </Popover>
-  );
-};
-
-type AddWorkLogSheetProps = {
-  onCreated: () => void;
-};
-
-const AddWorkLogSheet = ({ onCreated }: AddWorkLogSheetProps) => {
-  const [open, setOpen] = useState(false);
-  const [form, setForm] = useState<AddWorkLogFormState>(
-    getDefaultAddWorkLogForm
-  );
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const resetForm = () => {
-    setForm(getDefaultAddWorkLogForm());
-  };
-
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
-    if (!form.title.trim() || !form.content.trim() || !form.dateLogged) {
-      appToast.error("Please fill title, content, and date logged.");
-      return;
-    }
-
-    setIsSubmitting(true);
+  const handleDelete = async () => {
+    setIsDeleting(true);
 
     try {
-      await createWorkLog({
-        content: form.content.trim(),
-        date_logged: formatDateForApi(form.dateLogged),
-        mood_score: Number(form.moodScore),
-        productivity_score: Number(form.productivityScore),
-        tags: getTagsFromText(form.tags),
-        title: form.title.trim(),
-      });
-
-      appToast.success("Work log added.");
-      resetForm();
+      await deleteWorkLog(workLog.id);
+      appToast.success("Work log deleted.");
       setOpen(false);
-      onCreated();
+      onDeleted();
     } catch (error) {
       appToast.error(getWorkLogsErrorMessage(error));
     } finally {
-      setIsSubmitting(false);
+      setIsDeleting(false);
     }
   };
 
   return (
-    <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger asChild>
-        <Button type="button" variant="success">
-          <PlusIcon aria-hidden="true" data-icon="inline-start" />
-          Add
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button
+          aria-label="Delete work log"
+          size="icon-sm"
+          type="button"
+          variant="danger"
+        >
+          <Trash2Icon aria-hidden="true" />
         </Button>
-      </SheetTrigger>
-      <SheetContent className="w-full sm:max-w-lg">
-        <SheetHeader className="border-b pr-12">
-          <SheetTitle>Add work logs</SheetTitle>
-        </SheetHeader>
-
-        <form className="flex min-h-0 flex-1 flex-col" onSubmit={handleSubmit}>
-          <div className="grid flex-1 gap-4 overflow-y-auto px-4 py-2">
-            <div className="grid gap-2">
-              <Label htmlFor="add-work-log-title">Title</Label>
-              <Input
-                id="add-work-log-title"
-                onChange={(event) =>
-                  setForm((value) => ({
-                    ...value,
-                    title: event.target.value,
-                  }))
-                }
-                placeholder="Work log title"
-                value={form.title}
-              />
-            </div>
-
-            <div className="grid gap-2">
-              <Label htmlFor="add-work-log-content">Content</Label>
-              <Textarea
-                className="min-h-32 resize-none"
-                id="add-work-log-content"
-                onChange={(event) =>
-                  setForm((value) => ({
-                    ...value,
-                    content: event.target.value,
-                  }))
-                }
-                placeholder="What did you work on?"
-                value={form.content}
-              />
-            </div>
-
-            <div className="grid gap-2">
-              <Label>Date logged</Label>
-              <DateLoggedPicker
-                date={form.dateLogged}
-                onSelect={(dateLogged) =>
-                  setForm((value) => ({
-                    ...value,
-                    dateLogged,
-                  }))
-                }
-              />
-            </div>
-
-            <div className="grid gap-3 sm:grid-cols-2">
-              <div className="grid gap-2">
-                <Label htmlFor="add-work-log-mood">Mood score</Label>
-                <Input
-                  id="add-work-log-mood"
-                  max={5}
-                  min={1}
-                  onChange={(event) =>
-                    setForm((value) => ({
-                      ...value,
-                      moodScore: event.target.value,
-                    }))
-                  }
-                  type="number"
-                  value={form.moodScore}
-                />
-              </div>
-
-              <div className="grid gap-2">
-                <Label htmlFor="add-work-log-productivity">
-                  Productivity score
-                </Label>
-                <Input
-                  id="add-work-log-productivity"
-                  max={5}
-                  min={1}
-                  onChange={(event) =>
-                    setForm((value) => ({
-                      ...value,
-                      productivityScore: event.target.value,
-                    }))
-                  }
-                  type="number"
-                  value={form.productivityScore}
-                />
-              </div>
-            </div>
-
-            <div className="grid gap-2">
-              <Label htmlFor="add-work-log-tags">Tags</Label>
-              <Input
-                id="add-work-log-tags"
-                onChange={(event) =>
-                  setForm((value) => ({
-                    ...value,
-                    tags: event.target.value,
-                  }))
-                }
-                placeholder="frontend, api, planning"
-                value={form.tags}
-              />
-            </div>
-          </div>
-
-          <SheetFooter className="border-t sm:flex-row sm:justify-end">
-            <Button
-              disabled={isSubmitting}
-              onClick={resetForm}
-              type="button"
-              variant="outline"
-            >
-              <RotateCcwIcon aria-hidden="true" data-icon="inline-start" />
-              Reset form
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Delete work log</DialogTitle>
+          <DialogDescription>
+            Are you sure you want to delete {workLog.title}? This action cannot
+            be undone.
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter>
+          <DialogClose asChild>
+            <Button disabled={isDeleting} type="button" variant="outline">
+              Cancel
             </Button>
-            <Button isLoading={isSubmitting} type="submit" variant="success">
-              <PlusIcon aria-hidden="true" data-icon="inline-start" />
-              Add work log
-            </Button>
-          </SheetFooter>
-        </form>
-      </SheetContent>
-    </Sheet>
+          </DialogClose>
+          <Button
+            isLoading={isDeleting}
+            onClick={handleDelete}
+            type="button"
+            variant="danger"
+          >
+            <Trash2Icon aria-hidden="true" data-icon="inline-start" />
+            Delete
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 };
 
@@ -451,17 +252,29 @@ export const WorkLogsPage = () => {
     totalPages,
     workLogs,
   } = useWorkLogs();
+
   return (
     <section className="mx-auto flex w-full max-w-5xl flex-col gap-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="space-y-1">
-          <p className="text-sm font-medium text-primary">Work Logs</p>
-          <h1 className="text-2xl font-semibold">Work Logs</h1>
+          <div className="flex gap-2 items-center">
+            <LucideLayoutDashboard className="w-8 h-8 text-primary" />
+            <h1 className="text-2xl font-semibold">Work Logs</h1>
+          </div>
           <p className="text-sm text-muted-foreground">
             Track daily work activity and service notes.
           </p>
         </div>
-        <AddWorkLogSheet onCreated={reloadWorkLogs} />
+        <WorkLogSheet
+          mode="create"
+          onSaved={reloadWorkLogs}
+          trigger={
+            <Button type="button" variant="success">
+              <PlusIcon aria-hidden="true" data-icon="inline-start" />
+              Add
+            </Button>
+          }
+        />
       </div>
 
       <div className="overflow-hidden rounded-lg border bg-card">
@@ -502,7 +315,7 @@ export const WorkLogsPage = () => {
               }
               value={filters.month}
             >
-              <SelectTrigger>
+              <SelectTrigger className="h-10 min-h-10 w-full">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent position="popper">
@@ -528,7 +341,7 @@ export const WorkLogsPage = () => {
               }
               value={filters.year}
             >
-              <SelectTrigger>
+              <SelectTrigger className="h-10 min-h-10 w-full">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent position="popper">
@@ -546,6 +359,8 @@ export const WorkLogsPage = () => {
           <Button
             className="w-full lg:w-auto"
             isLoading={isLoading}
+            variant="info"
+            size="xl"
             type="submit"
           >
             <SearchIcon aria-hidden="true" data-icon="inline-start" />
@@ -554,36 +369,37 @@ export const WorkLogsPage = () => {
         </form>
 
         {isLoading ? (
-          <div className="px-4 py-6 text-sm text-muted-foreground flex items-center justify-center">
-            <LineMdLoadingLoop className="w-10 h-10" />
+          <div className="flex items-center justify-center px-4 py-6 text-sm text-muted-foreground h-[489.5px]">
+            <LineMdLoadingLoop className="h-10 w-10" />
           </div>
         ) : errorMessage ? (
-          <div className="px-4 py-6 text-sm text-destructive">
+          <div className="px-4 py-6 flex justify-center items-center text-sm text-destructive h-[489.5px]">
             {errorMessage}
           </div>
         ) : workLogs.items.length ? (
-          <Table>
+          <Table classNameContainer="min-h-[489.5px]">
             <TableHeader>
               <TableRow>
                 <TableHead>Title</TableHead>
-                <TableHead className="min-w-[220px]">Content</TableHead>
-                <TableHead>Mood</TableHead>
-                <TableHead>Productivity</TableHead>
-                <TableHead>Tags</TableHead>
-                <TableHead>Logged Date</TableHead>
+                <TableHead className="text-center">Mood</TableHead>
+                <TableHead className="text-center">Productivity</TableHead>
+                <TableHead className="text-center">Tags</TableHead>
+                <TableHead className="text-center">Logged Date</TableHead>
+                <TableHead className="text-center">Action</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {workLogs.items.map((log) => (
                 <TableRow key={log.id}>
                   <TableCell className="font-medium">{log.title}</TableCell>
-                  <TableCell className="max-w-[280px] whitespace-normal text-muted-foreground">
-                    {log.content}
+                  <TableCell className="text-center">
+                    {getMoodScoreLabel(log.mood_score)}
                   </TableCell>
-                  <TableCell>{log.mood_score}/5</TableCell>
-                  <TableCell>{log.productivity_score}/5</TableCell>
+                  <TableCell className="text-center">
+                    {getProductivityScoreLabel(log.productivity_score)}
+                  </TableCell>
                   <TableCell>
-                    <div className="flex max-w-[240px] flex-wrap gap-1">
+                    <div className="flex justify-center max-w-[240px] flex-wrap gap-1">
                       {log.tags.map((tag) => (
                         <span
                           className="rounded-md bg-secondary px-2 py-0.5 text-xs text-secondary-foreground"
@@ -594,13 +410,52 @@ export const WorkLogsPage = () => {
                       ))}
                     </div>
                   </TableCell>
-                  <TableCell>{formatWorkLogDate(log.date_logged)}</TableCell>
+                  <TableCell className="text-center">
+                    {formatWorkLogDate(log.date_logged)}
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex justify-center gap-2">
+                      <WorkLogSheet
+                        mode="view"
+                        trigger={
+                          <Button
+                            aria-label="View work log"
+                            size="icon-sm"
+                            type="button"
+                            variant="outline"
+                          >
+                            <EyeIcon aria-hidden="true" />
+                          </Button>
+                        }
+                        workLog={log}
+                      />
+                      <WorkLogSheet
+                        mode="edit"
+                        onSaved={reloadWorkLogs}
+                        trigger={
+                          <Button
+                            aria-label="Edit work log"
+                            size="icon-sm"
+                            type="button"
+                            variant="warning"
+                          >
+                            <PencilIcon aria-hidden="true" />
+                          </Button>
+                        }
+                        workLog={log}
+                      />
+                      <DeleteWorkLogDialog
+                        onDeleted={reloadWorkLogs}
+                        workLog={log}
+                      />
+                    </div>
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
         ) : (
-          <div className="px-4 py-6 text-sm text-muted-foreground">
+          <div className="px-4 py-6 text-sm text-muted-foreground min-h-[489.5px] flex items-center justify-center">
             No work logs yet.
           </div>
         )}

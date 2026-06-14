@@ -1,21 +1,22 @@
 "use client";
 
-import { LayoutDashboardIcon, TimerIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import { cn } from "@/lib/utils";
+import { LucideTimer } from "@/assets/icons/LucideTimer";
+import { LucideLayoutDashboard } from "@/assets/icons/LucideLayoutDashboard";
 
 const navItems = [
   {
     href: "/dashboard",
     label: "Dashboard",
-    icon: LayoutDashboardIcon,
+    icon: <LucideLayoutDashboard className="w-6 h-6" />
   },
   {
     href: "/work-logs",
     label: "Work Logs",
-    icon: TimerIcon,
+    icon: <LucideTimer className="w-6 h-6"/>
   },
 ];
 
@@ -31,7 +32,6 @@ export const AppSidebar = () => {
       </div>
       <nav className="flex flex-1 flex-col gap-1 p-3">
         {navItems.map((item) => {
-          const Icon = item.icon;
           const isActive =
             pathname === item.href || pathname.startsWith(`${item.href}/`);
 
@@ -46,7 +46,7 @@ export const AppSidebar = () => {
               href={item.href}
               key={item.href}
             >
-              <Icon aria-hidden="true" className="size-4" />
+              {item.icon}
               {item.label}
             </Link>
           );

@@ -1,0 +1,330 @@
+"use client";
+
+import { CalendarIcon, PlusIcon, RotateCcwIcon } from "lucide-react";
+import { type FormEvent, useMemo, useState } from "react";
+
+import { Calendar } from "@/components/ui/calendar";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Sheet,
+  SheetContent,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import { Textarea } from "@/components/ui/textarea";
+import { appToast } from "@/lib/toast";
+import { cn } from "@/lib/utils";
+import {
+  createWorkLog,
+  getWorkLogsErrorMessage,
+  updateWorkLog,
+} from "@/modules/core/work-logs/functions";
+
+import {
+  buildWorkLogSheetPayload,
+  formatDatePickerLabel,
+  getDefaultWorkLogSheetForm,
+  getWorkLogSheetFormFromWorkLog,
+  getWorkLogSheetTitle,
+} from "./functions";
+import type { WorkLogSheetFormState, WorkLogSheetProps } from "./models";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { moodScoreOptions, productivityScoreOptions } from "@/constants/worklogs";
+
+type DateLoggedPickerProps = {
+  date?: Date;
+  disabled?: boolean;
+  onSelect: (date?: Date) => void;
+};
+
+const DateLoggedPicker = ({
+  date,
+  disabled,
+  onSelect,
+}: DateLoggedPickerProps) => {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          className={cn(
+            "w-full h-10 justify-start text-left font-normal",
+            !date && "text-muted-foreground",
+          )}
+          disabled={disabled}
+          type="button"
+          variant="outline"
+        >
+          <CalendarIcon aria-hidden="true" data-icon="inline-start" />
+          {formatDatePickerLabel(date)}
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent align="start" className="w-auto">
+        <Calendar
+          mode="single"
+          selected={date}
+          onSelect={(selectedDate) => {
+            onSelect(selectedDate);
+            setOpen(false);
+          }}
+        />
+      </PopoverContent>
+    </Popover>
+  );
+};
+
+export const WorkLogSheet = ({
+  mode,
+  onSaved,
+  trigger,
+  workLog,
+}: WorkLogSheetProps) => {
+  const [open, setOpen] = useState(false);
+  const initialForm = useMemo(
+    () => getWorkLogSheetFormFromWorkLog(workLog),
+    [workLog],
+  );
+  const [form, setForm] = useState<WorkLogSheetFormState>(initialForm);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const isViewMode = mode === "view";
+  const isEditMode = mode === "edit";
+  const isCreateMode = mode === "create";
+  const title = getWorkLogSheetTitle(mode);
+
+  const updateOpen = (nextOpen: boolean) => {
+    if (nextOpen) {
+      setForm(initialForm);
+    }
+
+    setOpen(nextOpen);
+  };
+
+  const resetForm = () => {
+    if (isCreateMode) {
+      setForm(getDefaultWorkLogSheetForm());
+      return;
+    }
+
+    setForm((value) => ({
+      ...initialForm,
+      dateLogged: value.dateLogged,
+    }));
+  };
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (isViewMode) {
+      return;
+    }
+
+    if (!form.title.trim() || !form.content.trim() || !form.dateLogged) {
+      appToast.error("Please fill title, content, and date logged.");
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const payload = buildWorkLogSheetPayload(form);
+
+      if (isEditMode) {
+        if (!workLog?.id) {
+          throw new Error("Work log id is required.");
+        }
+
+        await updateWorkLog(workLog.id, {
+          ...payload,
+          user_id: workLog.user_id,
+        });
+        appToast.success("Work log updated.");
+      } else {
+        await createWorkLog(payload);
+        appToast.success("Work log added.");
+      }
+
+      updateOpen(false);
+      onSaved?.();
+    } catch (error) {
+      appToast.error(getWorkLogsErrorMessage(error));
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <Sheet open={open} onOpenChange={updateOpen}>
+      <SheetTrigger asChild>{trigger}</SheetTrigger>
+      <SheetContent className="w-full sm:max-w-lg">
+        <SheetHeader className="border-b pr-12">
+          <SheetTitle>{title}</SheetTitle>
+        </SheetHeader>
+
+        <form className="flex min-h-0 flex-1 flex-col" onSubmit={handleSubmit}>
+          <div className="flex flex-col gap-4 overflow-y-auto px-4 py-2">
+            <div className="grid gap-2">
+              <Label htmlFor={`${mode}-work-log-title`}>Title</Label>
+              <Input
+                disabled={isViewMode}
+                id={`${mode}-work-log-title`}
+                onChange={(event) =>
+                  setForm((value) => ({
+                    ...value,
+                    title: event.target.value,
+                  }))
+                }
+                placeholder="Work log title"
+                value={form.title}
+              />
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor={`${mode}-work-log-content`}>Content</Label>
+              <Textarea
+                className="min-h-32 resize-none"
+                disabled={isViewMode}
+                id={`${mode}-work-log-content`}
+                onChange={(event) =>
+                  setForm((value) => ({
+                    ...value,
+                    content: event.target.value,
+                  }))
+                }
+                placeholder="What did you work on?"
+                value={form.content}
+              />
+            </div>
+
+            <div className="grid gap-2">
+              <Label>Date logged</Label>
+              <DateLoggedPicker
+                date={form.dateLogged}
+                disabled={isViewMode || isEditMode}
+                onSelect={(dateLogged) =>
+                  setForm((value) => ({
+                    ...value,
+                    dateLogged,
+                  }))
+                }
+              />
+            </div>
+
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="grid gap-2">
+                <Label htmlFor={`${mode}-work-log-mood`}>Mood score</Label>
+                <Select
+                  disabled={isViewMode}
+                  onValueChange={(mood) =>
+                    setForm((value) => ({
+                      ...value,
+                      moodScore: mood,
+                    }))
+                  }
+                  value={form.moodScore}
+                >
+                  <SelectTrigger className="w-full h-10 min-h-10">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent position="popper">
+                    <SelectGroup>
+                      {moodScoreOptions.map((mood) => (
+                        <SelectItem key={mood.value} value={mood.value}>
+                          {mood.label}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor={`${mode}-work-log-productivity`}>
+                  Productivity score
+                </Label>
+                <Select
+                  disabled={isViewMode}
+                  onValueChange={(score) =>
+                    setForm((value) => ({
+                      ...value,
+                      productivityScore: score,
+                    }))
+                  }
+                  value={form.productivityScore}
+                >
+                  <SelectTrigger className="w-full h-10 min-h-10">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent position="popper">
+                    <SelectGroup>
+                      {productivityScoreOptions.map((score) => (
+                        <SelectItem key={score.value} value={score.value}>
+                          {score.label}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor={`${mode}-work-log-tags`}>Tags</Label>
+              <Input
+                disabled={isViewMode}
+                id={`${mode}-work-log-tags`}
+                onChange={(event) =>
+                  setForm((value) => ({
+                    ...value,
+                    tags: event.target.value,
+                  }))
+                }
+                placeholder="frontend, api, planning"
+                value={form.tags}
+              />
+            </div>
+          </div>
+
+          {!isViewMode ? (
+            <SheetFooter className="border-t sm:flex-row sm:justify-end">
+              <Button
+                disabled={isSubmitting}
+                onClick={resetForm}
+                type="button"
+                variant="outline"
+              >
+                <RotateCcwIcon aria-hidden="true" data-icon="inline-start" />
+                Reset form
+              </Button>
+              <Button
+                isLoading={isSubmitting}
+                type="submit"
+                variant={isEditMode ? "warning" : "success"}
+              >
+                <PlusIcon aria-hidden="true" data-icon="inline-start" />
+                {isEditMode ? "Edit work log" : "Add work log"}
+              </Button>
+            </SheetFooter>
+          ) : null}
+        </form>
+      </SheetContent>
+    </Sheet>
+  );
+};
