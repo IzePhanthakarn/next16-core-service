@@ -7,6 +7,27 @@ export type Property = {
   updated_at?: string;
 };
 
+export type PropertyOption = {
+  id: string;
+  sort_order: number;
+  label: string;
+  value: string;
+  is_active: boolean;
+};
+
+export type PropertyWithOptions = {
+  id: string;
+  name: string;
+  code: string;
+  description: string;
+  options: PropertyOption[];
+};
+
+export type CachedPropertyOption = {
+  label: string;
+  value: string;
+};
+
 export type PropertiesData = {
   items: Property[];
   total_items: number;

@@ -7,7 +7,7 @@ export const getDefaultWorkLogSheetForm = (): WorkLogSheetFormState => ({
   dateLogged: new Date(),
   moodScore: "3",
   productivityScore: "3",
-  tags: "",
+  tags: [],
   title: "",
 });
 
@@ -50,15 +50,6 @@ export const formatDatePickerLabel = (date?: Date) =>
       }).format(date)
     : "Select date";
 
-export const getTagsFromText = (value: string) =>
-  value
-    .split(",")
-    .map((tag) => tag.trim())
-    .filter(Boolean);
-
-export const getWorkLogTagsText = (workLog: WorkLog) =>
-  workLog.tags.map((tag) => tag.work_tag).join(", ");
-
 export const getWorkLogSheetFormFromWorkLog = (
   workLog?: WorkLog
 ): WorkLogSheetFormState => {
@@ -71,7 +62,7 @@ export const getWorkLogSheetFormFromWorkLog = (
     dateLogged: new Date(workLog.date_logged),
     moodScore: workLog.mood_score.toString(),
     productivityScore: workLog.productivity_score.toString(),
-    tags: getWorkLogTagsText(workLog),
+    tags: workLog.tags.map((tag) => tag.work_tag),
     title: workLog.title,
   };
 };
@@ -88,7 +79,7 @@ export const buildWorkLogSheetPayload = (
     date_logged: formatDateForApi(form.dateLogged),
     mood_score: Number(form.moodScore),
     productivity_score: Number(form.productivityScore),
-    tags: getTagsFromText(form.tags),
+    tags: form.tags,
     title: form.title.trim(),
   };
 };

@@ -7,7 +7,7 @@ export type WorkLogSheetFormState = {
   dateLogged?: Date;
   moodScore: string;
   productivityScore: string;
-  tags: string;
+  tags: string[];
   title: string;
 };
 

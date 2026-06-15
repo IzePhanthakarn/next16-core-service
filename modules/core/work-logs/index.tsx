@@ -39,6 +39,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { monthOptions, yearOption } from "@/constants/datetime";
+import PROPERTY_TYPES from "@/constants/properties";
+import { getPropertyOptionsByCode } from "@/modules/core/properties/functions";
 
 import {
   deleteWorkLog,
@@ -253,6 +255,10 @@ const DeleteWorkLogDialog = ({
 };
 
 export const WorkLogsPage = () => {
+  useEffect(() => {
+    void getPropertyOptionsByCode(PROPERTY_TYPES.WORK_TAGS);
+  }, []);
+
   const {
     currentPage,
     errorMessage,

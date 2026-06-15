@@ -48,6 +48,20 @@ import {
 import { moodScoreOptions, productivityScoreOptions } from "@/constants/worklogs";
 import { UilPlusCircle } from "@/assets/icons/UilPlusCircle";
 import { UilCalendar } from "@/assets/icons/UilCalendar";
+import {
+  Combobox,
+  ComboboxChip,
+  ComboboxChips,
+  ComboboxChipsInput,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxItem,
+  ComboboxList,
+  ComboboxValue,
+  useComboboxAnchor,
+} from "@/components/ui/combobox";
+import type { CachedPropertyOption } from "@/modules/core/properties/models";
+import PROPERTY_TYPES from "@/constants/properties";
 
 type DateLoggedPickerProps = {
   date?: Date;
@@ -105,6 +119,8 @@ export const WorkLogSheet = ({
   );
   const [form, setForm] = useState<WorkLogSheetFormState>(initialForm);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [tagOptions, setTagOptions] = useState<CachedPropertyOption[]>([]);
+  const anchor = useComboboxAnchor();
 
   const isViewMode = mode === "view";
   const isEditMode = mode === "edit";
@@ -114,8 +130,13 @@ export const WorkLogSheet = ({
   const updateOpen = (nextOpen: boolean) => {
     if (nextOpen) {
       setForm(initialForm);
+      try {
+        const cached = sessionStorage.getItem(PROPERTY_TYPES.WORK_TAGS);
+        setTagOptions(cached ? (JSON.parse(cached) as CachedPropertyOption[]) : []);
+      } catch {
+        setTagOptions([]);
+      }
     }
-
     setOpen(nextOpen);
   };
 
@@ -289,18 +310,51 @@ export const WorkLogSheet = ({
 
             <div className="grid gap-2">
               <Label htmlFor={`${mode}-work-log-tags`}>Tags</Label>
-              <Input
+              <Combobox
+                autoHighlight
                 disabled={isViewMode}
-                id={`${mode}-work-log-tags`}
-                onChange={(event) =>
-                  setForm((value) => ({
-                    ...value,
-                    tags: event.target.value,
-                  }))
+                items={tagOptions.map((opt) => opt.value)}
+                itemToStringValue={(item: string) =>
+                  tagOptions.find((opt) => opt.value === item)?.label ?? item
                 }
-                placeholder="frontend, api, planning"
+                multiple
+                onValueChange={(tags) =>
+                  setForm((value) => ({ ...value, tags: tags as string[] }))
+                }
                 value={form.tags}
-              />
+              >
+                <ComboboxChips ref={anchor}>
+                  <ComboboxValue>
+                    {(values) => (
+                      <>
+                        {(values as string[]).map((tagValue) => (
+                          <ComboboxChip key={tagValue} showRemove={!isViewMode}>
+                            {tagOptions.find((opt) => opt.value === tagValue)?.label ?? tagValue}
+                          </ComboboxChip>
+                        ))}
+                        {!isViewMode && (
+                          <ComboboxChipsInput
+                            id={`${mode}-work-log-tags`}
+                            placeholder="Select tags..."
+                          />
+                        )}
+                      </>
+                    )}
+                  </ComboboxValue>
+                </ComboboxChips>
+                {!isViewMode && (
+                  <ComboboxContent anchor={anchor}>
+                    <ComboboxEmpty>No tags found.</ComboboxEmpty>
+                    <ComboboxList>
+                      {(item) => (
+                        <ComboboxItem key={item as string} value={item as string}>
+                          {tagOptions.find((opt) => opt.value === (item as string))?.label ?? (item as string)}
+                        </ComboboxItem>
+                      )}
+                    </ComboboxList>
+                  </ComboboxContent>
+                )}
+              </Combobox>
             </div>
           </div>
 
