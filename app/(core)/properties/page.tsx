@@ -1,0 +1,1 @@
+export {PropertiesPage as default} from "@/modules/core/properties";

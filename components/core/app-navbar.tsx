@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { UserIcon } from "lucide-react";
 
 import {
   Avatar,
@@ -23,6 +22,7 @@ import {
   type UserProfile,
 } from "@/lib/current-user";
 import { LogoutButton } from "@/modules/dashboard/logout-button";
+import { UilUserSquare } from "@/assets/icons/UilUserSquare";
 
 type AppNavbarProps = {
   user: UserProfile;
@@ -73,7 +73,7 @@ export const AppNavbar = ({ user }: AppNavbarProps) => {
           <DropdownMenuSeparator />
           <DropdownMenuItem asChild>
             <Link className="cursor-pointer" href="/profile">
-              <UserIcon aria-hidden="true" className="size-4" />
+              <UilUserSquare aria-hidden="true" className="size-4" />
               Profile
             </Link>
           </DropdownMenuItem>

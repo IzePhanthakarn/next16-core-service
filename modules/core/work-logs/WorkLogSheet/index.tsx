@@ -1,6 +1,6 @@
 "use client";
 
-import { CalendarIcon, PlusIcon, RotateCcwIcon } from "lucide-react";
+import { RotateCcwIcon } from "lucide-react";
 import { type FormEvent, useMemo, useState } from "react";
 
 import { Calendar } from "@/components/ui/calendar";
@@ -46,6 +46,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { moodScoreOptions, productivityScoreOptions } from "@/constants/worklogs";
+import { UilPlusCircle } from "@/assets/icons/UilPlusCircle";
+import { UilCalendar } from "@/assets/icons/UilCalendar";
 
 type DateLoggedPickerProps = {
   date?: Date;
@@ -72,7 +74,7 @@ const DateLoggedPicker = ({
           type="button"
           variant="outline"
         >
-          <CalendarIcon aria-hidden="true" data-icon="inline-start" />
+          <UilCalendar aria-hidden="true" data-icon="inline-start" />
           {formatDatePickerLabel(date)}
         </Button>
       </PopoverTrigger>
@@ -318,7 +320,7 @@ export const WorkLogSheet = ({
                 type="submit"
                 variant={isEditMode ? "warning" : "success"}
               >
-                <PlusIcon aria-hidden="true" data-icon="inline-start" />
+                <UilPlusCircle aria-hidden="true" data-icon="inline-start" />
                 {isEditMode ? "Edit work log" : "Add work log"}
               </Button>
             </SheetFooter>

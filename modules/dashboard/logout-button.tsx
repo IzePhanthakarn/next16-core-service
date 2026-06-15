@@ -1,6 +1,5 @@
 "use client";
 
-import { LogOutIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -8,6 +7,7 @@ import { Button, type buttonVariants } from "@/components/ui/button";
 import { appToast } from "@/lib/toast";
 import { cn } from "@/lib/utils";
 import type { VariantProps } from "class-variance-authority";
+import { UilSignout } from "@/assets/icons/UilSignout";
 
 type LogoutButtonProps = VariantProps<typeof buttonVariants> & {
   className?: string;
@@ -46,7 +46,7 @@ export const LogoutButton = ({
       type="button"
       variant={variant}
     >
-      <LogOutIcon aria-hidden="true" className="size-4" />
+      <UilSignout aria-hidden="true" className="size-4" />
       Logout
     </Button>
   );

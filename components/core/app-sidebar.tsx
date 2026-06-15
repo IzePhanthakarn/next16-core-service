@@ -6,17 +6,24 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { LucideTimer } from "@/assets/icons/LucideTimer";
 import { LucideLayoutDashboard } from "@/assets/icons/LucideLayoutDashboard";
+import PAGE_ROUTE from "@/constants/page_route";
+import { LucideTags } from "@/assets/icons/LucideTags";
 
 const navItems = [
   {
-    href: "/dashboard",
+    href: PAGE_ROUTE.DASHBOARD,
     label: "Dashboard",
     icon: <LucideLayoutDashboard className="w-6 h-6" />
   },
   {
-    href: "/work-logs",
+    href: PAGE_ROUTE.WORK_LOGS.INDEX,
     label: "Work Logs",
     icon: <LucideTimer className="w-6 h-6"/>
+  },
+  {
+    href: PAGE_ROUTE.PROPERTIES.INDEX,
+    label: "Properties",
+    icon: <LucideTags className="h-6 w-6" />,
   },
 ];
 
@@ -26,7 +33,7 @@ export const AppSidebar = () => {
   return (
     <aside className="hidden min-h-screen w-64 shrink-0 border-r bg-sidebar text-sidebar-foreground lg:flex lg:flex-col">
       <div className="flex h-16 shrink-0 items-center border-b px-5">
-        <Link className="text-lg font-semibold" href="/dashboard">
+        <Link className="text-lg font-semibold" href={PAGE_ROUTE.DASHBOARD}>
           Core Service
         </Link>
       </div>
