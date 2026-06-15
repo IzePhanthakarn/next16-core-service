@@ -79,6 +79,7 @@ import { defaultActiveDaysTarget } from "./StatsGrid/models";
 import Link from "next/link";
 import { Separator } from "@/components/ui/separator";
 import PAGE_ROUTE from "@/constants/page_route";
+import { LucideTimer } from "@/assets/icons/LucideTimer";
 
 type WorkLogsFilterState = {
   title: string;
@@ -338,7 +339,7 @@ export const WorkLogsPage = () => {
     );
   } else if (workLogs.items.length) {
     workLogsContent = (
-      <Table classNameContainer="min-h-[489.5px]">
+      <Table classNameContainer="min-h-[489.5px] px-2">
         <TableHeader>
           <TableRow>
             <TableHead>Title</TableHead>
@@ -429,7 +430,7 @@ export const WorkLogsPage = () => {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="space-y-1">
           <div className="flex gap-2 items-center">
-            <LucideLayoutDashboard className="w-8 h-8 text-primary" />
+            <LucideTimer className="w-10 h-10 text-primary" />
             <h1 className="text-2xl font-semibold">Work Logs</h1>
           </div>
           <p className="text-sm text-muted-foreground">
@@ -457,9 +458,9 @@ export const WorkLogsPage = () => {
 
       <StatsGrid
         activeDays={workLogs.total_items}
-        allWorkLogs={workLogs.total_items}
-        monthlyMoodScore={3.5}
-        monthlyProductivityScore={3}
+        allWorkLogs={workLogs.all_work_logs}
+        monthlyMoodScore={workLogs.monthly_mood_score}
+        monthlyProductivityScore={workLogs.monthly_productivity_score}
         activeDaysTarget={defaultActiveDaysTarget}
       />
 

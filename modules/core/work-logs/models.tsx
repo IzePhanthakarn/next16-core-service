@@ -22,6 +22,9 @@ export type WorkLogsData = {
   total_items: number;
   total_pages: number;
   current_page: number;
+  all_work_logs: number;
+  monthly_mood_score: number;
+  monthly_productivity_score: number;
 };
 
 export type WorkLogsResponse = {
@@ -57,6 +60,9 @@ export const emptyWorkLogs: WorkLogsData = {
   total_items: 0,
   total_pages: 1,
   current_page: 1,
+  all_work_logs: 0,
+  monthly_mood_score: 0,
+  monthly_productivity_score: 0,
 };
 
 export const itemPerPageOptions = [10, 20, 31] as const;
