@@ -14,14 +14,13 @@ import {
   type WorkLogsResponse,
 } from "./models";
 
-type CreateWorkLogResponse = {
+type WorkLogResponse = {
   status: string;
   code: number;
   message: string;
   data: WorkLog;
 };
 
-type UpdateWorkLogResponse = CreateWorkLogResponse;
 
 type DeleteWorkLogResponse = {
   status: string;
@@ -65,7 +64,7 @@ export const getWorkLogs = async (query: WorkLogsQuery = {}) => {
 };
 
 export const createWorkLog = async (input: CreateWorkLogInput) => {
-  const response = await apiClient.post<CreateWorkLogResponse>(
+  const response = await apiClient.post<WorkLogResponse>(
     "/work-logs",
     input
   );
@@ -74,7 +73,7 @@ export const createWorkLog = async (input: CreateWorkLogInput) => {
 };
 
 export const updateWorkLog = async (id: string, input: UpdateWorkLogInput) => {
-  const response = await apiClient.put<UpdateWorkLogResponse>(
+  const response = await apiClient.put<WorkLogResponse>(
     `/work-logs/${id}`,
     input
   );

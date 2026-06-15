@@ -76,6 +76,9 @@ import { WorkLogSheet } from "./WorkLogSheet";
 import { appToast } from "@/lib/toast";
 import { StatsGrid } from "./StatsGrid";
 import { defaultActiveDaysTarget } from "./StatsGrid/models";
+import Link from "next/link";
+import { Separator } from "@/components/ui/separator";
+import PAGE_ROUTE from "@/constants/page_route";
 
 type WorkLogsFilterState = {
   title: string;
@@ -433,17 +436,24 @@ export const WorkLogsPage = () => {
             Track daily work activity and service notes.
           </p>
         </div>
-        <WorkLogSheet
-          mode="create"
-          onSaved={reloadWorkLogs}
-          trigger={
-            <Button type="button" variant="success">
-              <PlusIcon aria-hidden="true" data-icon="inline-start" />
-              Add
-            </Button>
-          }
-        />
+        <div className="flex flex-col items-end gap-2 -mb-1.5">
+          <WorkLogSheet
+            mode="create"
+            onSaved={reloadWorkLogs}
+            trigger={
+              <Button type="button" variant="success" className="w-fit font-medium">
+                <PlusIcon aria-hidden="true" data-icon="inline-start" />
+                Add
+              </Button>
+            }
+          />
+          <Link className="hover:text-primary hover:underline underline-offset-4" href={PAGE_ROUTE.WORK_LOGS.STATS}>
+            view all stats {">"}
+          </Link>
+        </div>
       </div>
+
+      <Separator />
 
       <StatsGrid
         activeDays={workLogs.total_items}
@@ -454,7 +464,6 @@ export const WorkLogsPage = () => {
       />
 
       <div className="overflow-hidden rounded-lg border bg-card">
-
         <form
           className="grid gap-3 border-b px-4 py-4 lg:grid-cols-[minmax(220px,1fr)_120px_120px_auto] lg:items-end"
           onSubmit={handleSearch}
