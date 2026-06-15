@@ -16,6 +16,7 @@ import {
 } from "react";
 
 import { LineMdLoadingLoop } from "@/assets/icons/LineMdLoadingLoop";
+import { LucideLayoutDashboard } from "@/assets/icons/LucideLayoutDashboard";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -73,7 +74,8 @@ import {
 } from "./models";
 import { WorkLogSheet } from "./WorkLogSheet";
 import { appToast } from "@/lib/toast";
-import { LucideLayoutDashboard } from "@/assets/icons/LucideLayoutDashboard";
+import { StatsGrid } from "./StatsGrid";
+import { defaultActiveDaysTarget } from "./StatsGrid/models";
 
 type WorkLogsFilterState = {
   title: string;
@@ -420,7 +422,7 @@ export const WorkLogsPage = () => {
   }
 
   return (
-    <section className="mx-auto flex w-full max-w-5xl flex-col gap-6">
+    <section className="mx-auto flex w-full max-w-6xl flex-col gap-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="space-y-1">
           <div className="flex gap-2 items-center">
@@ -443,13 +445,15 @@ export const WorkLogsPage = () => {
         />
       </div>
 
+      <StatsGrid
+        activeDays={workLogs.total_items}
+        allWorkLogs={workLogs.total_items}
+        monthlyMoodScore={3.5}
+        monthlyProductivityScore={3}
+        activeDaysTarget={defaultActiveDaysTarget}
+      />
+
       <div className="overflow-hidden rounded-lg border bg-card">
-        <div className="flex items-center justify-between gap-4 border-b px-4 py-3">
-          <h2 className="text-base font-semibold">All Work Logs</h2>
-          <p className="text-sm text-muted-foreground">
-            {workLogs.total_items} items
-          </p>
-        </div>
 
         <form
           className="grid gap-3 border-b px-4 py-4 lg:grid-cols-[minmax(220px,1fr)_120px_120px_auto] lg:items-end"
@@ -564,7 +568,9 @@ export const WorkLogsPage = () => {
                   {typeof item === "number" ? (
                     <PaginationLink
                       aria-disabled={isLoading}
-                      className={isLoading ? "pointer-events-none opacity-50" : ""}
+                      className={
+                        isLoading ? "pointer-events-none opacity-50" : ""
+                      }
                       href="#"
                       isActive={item === currentPage}
                       onClick={(event) => {
