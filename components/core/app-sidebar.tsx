@@ -8,6 +8,7 @@ import { LucideTimer } from "@/assets/icons/LucideTimer";
 import { LucideLayoutDashboard } from "@/assets/icons/LucideLayoutDashboard";
 import PAGE_ROUTE from "@/constants/page_route";
 import { LucideTags } from "@/assets/icons/LucideTags";
+import { UilCalendarAlt } from "@/assets/icons/UilCalendarAlt";
 
 const navItems = [
   {
@@ -19,6 +20,11 @@ const navItems = [
     href: PAGE_ROUTE.WORK_LOGS.INDEX,
     label: "Work Logs",
     icon: <LucideTimer className="w-6 h-6"/>
+  },
+  {
+    href: PAGE_ROUTE.WORK_DAYS.INDEX,
+    label: "Work Days",
+    icon: <UilCalendarAlt className="h-6 w-6" />,
   },
   {
     href: PAGE_ROUTE.PROPERTIES.INDEX,

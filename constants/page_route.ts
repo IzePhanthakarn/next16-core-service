@@ -4,6 +4,9 @@ const PAGE_ROUTE = {
         INDEX: "/work-logs",
         STATS: "/work-logs/stats"
     },
+    WORK_DAYS: {
+        INDEX: "/work-days",
+    },
     PROPERTIES: {
         INDEX: "/properties",
         DETAIL: (propertyId: string) => `/properties/${propertyId}`,
