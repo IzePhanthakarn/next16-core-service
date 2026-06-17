@@ -128,7 +128,7 @@ export const OptionSheet = ({ mode, onSaved, option, trigger }: OptionSheetProps
                 />
               ) : (
                 <Select onValueChange={setIsActive} value={isActive}>
-                  <SelectTrigger className="h-10 w-full min-h-10">
+                  <SelectTrigger className="h-9 w-full min-h-9">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent position="popper">
@@ -149,6 +149,7 @@ export const OptionSheet = ({ mode, onSaved, option, trigger }: OptionSheetProps
                 onClick={() => setOpen(false)}
                 type="button"
                 variant="outline"
+                size="lg"
               >
                 Cancel
               </Button>
@@ -157,6 +158,7 @@ export const OptionSheet = ({ mode, onSaved, option, trigger }: OptionSheetProps
                 onClick={() => { void handleSave(); }}
                 type="button"
                 variant="warning"
+                size="lg"
               >
                 <UilPen aria-hidden="true" data-icon="inline-start" />
                 Save Option

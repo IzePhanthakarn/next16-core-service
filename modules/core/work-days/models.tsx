@@ -17,6 +17,7 @@ export type WorkDayEvent = {
   title: string;
   time?: string;
   tag: WorkDayEventTag;
+  user_id?: string;
 };
 
 export type WorkDayEventsData = {
@@ -71,14 +72,14 @@ export const workDayEventTagOptions: {
   label: string;
   value: WorkDayEventTag;
 }[] = [
-  { label: "Blue", value: "blue" },
-  { label: "Coral", value: "coral" },
-  { label: "Gray", value: "gray" },
-  { label: "Mint", value: "mint" },
-  { label: "Crimson", value: "crimson" },
-  { label: "Purple", value: "purple" },
-  { label: "Terracotta", value: "terracotta" },
-  { label: "Amber", value: "amber" },
+  { label: "Meeting", value: "blue" },
+  { label: "Personal Leave", value: "gray" },
+  { label: "Onsite Travel", value: "mint" },
+  { label: "Deployment", value: "crimson" },
+  { label: "Code Review", value: "purple" },
+  { label: "Deep Work", value: "terracotta" },
+  { label: "Server Maintenance", value: "amber" },
+  { label: "Public Holidays", value: "coral" },
 ];
 
 // 1. Meeting (ประชุมทั่วไป/คุยงาน): สีฟ้า (Blue)

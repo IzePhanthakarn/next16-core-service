@@ -63,7 +63,7 @@ function ComboboxInput({
   return (
     <InputGroup
       className={cn(
-        "h-10 w-auto border-foreground/20 bg-white/40 shadow-inner shadow-black/5 hover:border-foreground/50 has-[[data-slot=input-group-control]:focus-visible]:border-foreground has-[[data-slot=input-group-control]:focus-visible]:ring-3 has-[[data-slot=input-group-control]:focus-visible]:ring-foreground/20 has-[[data-slot][aria-invalid=true]]:border-primary has-[[data-slot][aria-invalid=true]]:ring-3 has-[[data-slot][aria-invalid=true]]:ring-red-950/30 dark:border-white/25 dark:bg-input/30 dark:shadow-none dark:hover:border-white/60 dark:has-[[data-slot=input-group-control]:focus-visible]:border-white dark:has-[[data-slot=input-group-control]:focus-visible]:ring-white/20 dark:has-[[data-slot][aria-invalid=true]]:border-primary dark:has-[[data-slot][aria-invalid=true]]:ring-red-950/60",
+        "h-9 w-auto border-foreground/20 bg-white/40 shadow-inner shadow-black/5 hover:border-foreground/50 has-[[data-slot=input-group-control]:focus-visible]:border-foreground has-[[data-slot=input-group-control]:focus-visible]:ring-3 has-[[data-slot=input-group-control]:focus-visible]:ring-foreground/20 has-[[data-slot][aria-invalid=true]]:border-primary has-[[data-slot][aria-invalid=true]]:ring-3 has-[[data-slot][aria-invalid=true]]:ring-red-950/30 dark:border-white/25 dark:bg-input/30 dark:shadow-none dark:hover:border-white/60 dark:has-[[data-slot=input-group-control]:focus-visible]:border-white dark:has-[[data-slot=input-group-control]:focus-visible]:ring-white/20 dark:has-[[data-slot][aria-invalid=true]]:border-primary dark:has-[[data-slot][aria-invalid=true]]:ring-red-950/60",
         className
       )}
     >
@@ -228,7 +228,7 @@ function ComboboxChips({
     <ComboboxPrimitive.Chips
       data-slot="combobox-chips"
       className={cn(
-        "flex min-h-10 flex-wrap items-center gap-1 rounded-lg border border-foreground/20 bg-white/40 bg-clip-padding px-2.5 py-1 text-sm shadow-inner shadow-black/5 transition-colors hover:border-foreground/50 focus-within:border-foreground focus-within:ring-3 focus-within:ring-foreground/20 has-aria-invalid:border-primary has-aria-invalid:ring-3 has-aria-invalid:ring-red-950/30 has-data-[slot=combobox-chip]:px-1 dark:border-white/25 dark:bg-input/30 dark:shadow-none dark:hover:border-white/60 dark:focus-within:border-white dark:focus-within:ring-white/20 dark:has-aria-invalid:border-primary dark:has-aria-invalid:ring-red-950/60",
+        "flex min-h-9 flex-wrap items-center gap-1 rounded-lg border border-foreground/20 bg-white/40 bg-clip-padding px-2.5 py-1 text-sm shadow-inner shadow-black/5 transition-colors hover:border-foreground/50 focus-within:border-foreground focus-within:ring-3 focus-within:ring-foreground/20 has-aria-invalid:border-primary has-aria-invalid:ring-3 has-aria-invalid:ring-red-950/30 has-data-[slot=combobox-chip]:px-1 dark:border-white/25 dark:bg-input/30 dark:shadow-none dark:hover:border-white/60 dark:focus-within:border-white dark:focus-within:ring-white/20 dark:has-aria-invalid:border-primary dark:has-aria-invalid:ring-red-950/60",
         className
       )}
       {...props}

@@ -37,6 +37,7 @@ import {
 import {
   emptyWorkDayEvents,
   type WorkDayEventsData,
+  type WorkDayEvent,
   type WorkDayEventTag,
   workDayEventTagClassNames,
   workDayEventTagOptions,
@@ -47,6 +48,8 @@ import { UilAngleRight } from "@/assets/icons/UilAngleRight";
 import { UilPlusCircle } from "@/assets/icons/UilPlusCircle";
 import PAGE_ROUTE from "@/constants/page_route";
 import { useRouter } from "next/navigation";
+import { EventSheet } from "./EventSheet";
+import type { EventSheetMode } from "./EventSheet/models";
 
 type WorkDaysFilterState = {
   month: string;
@@ -133,6 +136,8 @@ const useWorkDayEvents = () => {
     setAppliedFilters(nextFilters);
   };
 
+  const refreshEvents = () => setAppliedFilters((prev) => ({ ...prev }));
+
   return {
     errorMessage,
     events,
@@ -140,9 +145,16 @@ const useWorkDayEvents = () => {
     goToMonth,
     handleSearch,
     isLoading,
+    refreshEvents,
     setFilters,
     visibleMonth,
   };
+};
+
+type EventSheetState = {
+  open: boolean;
+  mode: EventSheetMode;
+  event?: WorkDayEvent;
 };
 
 export const WorkDaysPage = () => {
@@ -154,6 +166,7 @@ export const WorkDaysPage = () => {
     goToMonth,
     handleSearch,
     isLoading,
+    refreshEvents,
     setFilters,
     visibleMonth,
   } = useWorkDayEvents();
@@ -162,17 +175,22 @@ export const WorkDaysPage = () => {
     [events.items, visibleMonth],
   );
   const eventCount = events.total_events;
+  const [eventSheet, setEventSheet] = useState<EventSheetState>({
+    open: false,
+    mode: "create",
+    event: undefined,
+  });
   let calendarContent: ReactNode;
 
   if (isLoading) {
     calendarContent = (
-      <div className="flex min-h-[456px] items-center justify-center px-4 py-6 text-sm text-muted-foreground">
-        <LineMdLoadingLoop className="h-10 w-10" />
+      <div className="flex min-h-114 items-center justify-center px-4 py-6 text-sm text-muted-foreground">
+        <LineMdLoadingLoop className="h-9 w-9" />
       </div>
     );
   } else if (errorMessage) {
     calendarContent = (
-      <div className="flex min-h-[456px] items-center justify-center px-4 py-6 text-sm text-destructive">
+      <div className="flex min-h-114 items-center justify-center px-4 py-6 text-sm text-destructive">
         {errorMessage}
       </div>
     );
@@ -204,13 +222,15 @@ export const WorkDaysPage = () => {
 
             <div className="space-y-1">
               {day.events.slice(0, 3).map((event) => (
-                <div
+                <button
                   className={cn(
-                    "flex h-8 min-w-0 items-center gap-2 rounded-md border px-2 text-xs font-medium",
+                    "flex h-8 min-w-0 w-full items-center gap-2 rounded-md border px-2 text-xs font-medium cursor-pointer hover:opacity-80 transition-opacity",
                     workDayEventTagClassNames[event.tag],
                   )}
                   key={event.id}
+                  onClick={() => setEventSheet({ open: true, mode: "view", event })}
                   title={event.title}
+                  type="button"
                 >
                   <span className="truncate">{event.title}</span>
                   {event.time ? (
@@ -218,7 +238,7 @@ export const WorkDaysPage = () => {
                       {event.time}
                     </span>
                   ) : null}
-                </div>
+                </button>
               ))}
               {day.events.length > 3 ? (
                 <div className="px-1 text-xs font-medium text-muted-foreground">
@@ -237,7 +257,7 @@ export const WorkDaysPage = () => {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
-            <UilCalendarAlt className="h-10 w-10 text-primary" />
+            <UilCalendarAlt className="h-9 w-9 text-primary" />
             <h1 className="text-2xl font-semibold">Work Days</h1>
           </div>
           <p className="text-sm text-muted-foreground">
@@ -249,11 +269,18 @@ export const WorkDaysPage = () => {
             className="w-fit border-2 border-border dark:border-input"
             type="button"
             variant="secondary"
+            size="lg"
             onClick={() => router.push(PAGE_ROUTE.WORK_DAYS.HOLIDAY)}
           >
             Holidays
           </Button>
-          <Button className="w-fit font-medium" type="button" variant="success">
+          <Button
+            className="w-fit font-medium"
+            type="button"
+            variant="success"
+            size="lg"
+            onClick={() => setEventSheet({ open: true, mode: "create", event: undefined })}
+          >
             <UilPlusCircle aria-hidden="true" data-icon="inline-start" />
             Add
           </Button>
@@ -324,7 +351,7 @@ export const WorkDaysPage = () => {
                 value={filters.year}
               >
                 <SelectTrigger
-                  className="h-10 min-h-10 w-full"
+                  className="h-9 min-h-9 w-full"
                   id="work-day-year"
                 >
                   <SelectValue />
@@ -353,7 +380,7 @@ export const WorkDaysPage = () => {
                 value={filters.month}
               >
                 <SelectTrigger
-                  className="h-10 min-h-10 w-full"
+                  className="h-9 min-h-9 w-full"
                   id="work-day-month"
                 >
                   <SelectValue />
@@ -382,7 +409,7 @@ export const WorkDaysPage = () => {
                 value={filters.tag}
               >
                 <SelectTrigger
-                  className="h-10 min-h-10 w-full"
+                  className="h-9 min-h-9 w-full"
                   id="work-day-tag"
                 >
                   <SelectValue />
@@ -403,7 +430,7 @@ export const WorkDaysPage = () => {
             <Button
               className="w-full sm:w-auto"
               isLoading={isLoading}
-              size="xl"
+              size="lg"
               type="submit"
               variant="info"
             >
@@ -426,6 +453,17 @@ export const WorkDaysPage = () => {
 
         {calendarContent}
       </div>
+
+      <EventSheet
+        event={eventSheet.event}
+        mode={eventSheet.mode}
+        onOpenChange={(open) => setEventSheet((prev) => ({ ...prev, open }))}
+        onSaved={() => {
+          setEventSheet((prev) => ({ ...prev, open: false }));
+          refreshEvents();
+        }}
+        open={eventSheet.open}
+      />
     </section>
   );
 };

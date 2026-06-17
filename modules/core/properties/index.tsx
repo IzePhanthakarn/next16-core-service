@@ -326,7 +326,7 @@ export const PropertiesPage = () => {
         <PropertySheet
           onSaved={reloadProperties}
           trigger={
-            <Button className="w-fit font-medium" type="button" variant="success">
+            <Button className="w-fit font-medium" type="button" variant="success" size="lg">
               <UilPlusCircle aria-hidden="true" data-icon="inline-start" />
               Add
             </Button>
@@ -374,7 +374,7 @@ export const PropertiesPage = () => {
           <Button
             className="w-full lg:w-auto"
             isLoading={isLoading}
-            size="xl"
+            size="lg"
             type="submit"
             variant="info"
           >

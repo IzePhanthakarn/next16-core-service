@@ -280,7 +280,7 @@ const renderContent = ({
           </div>
 
           <div className="flex justify-end">
-            <Button isLoading={isSaving} type="submit" variant="success">
+            <Button isLoading={isSaving} type="submit" variant="success" size="lg">
               Save
             </Button>
           </div>
@@ -299,7 +299,7 @@ const renderContent = ({
             propertyTypeId={propertyId}
             onSaved={handleAddOption}
             trigger={
-              <Button className="font-medium" type="button" variant="success">
+              <Button className="font-medium" type="button" variant="success" size="lg">
                 <UilPlusCircle aria-hidden="true" data-icon="inline-start" />
                 Add Option
               </Button>
@@ -443,7 +443,7 @@ export const PropertyDetailPage = ({ propertyId }: Props) => {
             View and edit property information and options.
           </p>
         </div>
-        <Button asChild size="xl" variant="outline">
+        <Button asChild size="lg" variant="outline">
           <Link href={PAGE_ROUTE.PROPERTIES.INDEX}>Back to Properties</Link>
         </Button>
       </div>

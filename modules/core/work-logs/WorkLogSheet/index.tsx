@@ -82,7 +82,7 @@ const DateLoggedPicker = ({
       <PopoverTrigger asChild>
         <Button
           className={cn(
-            "w-full h-10 justify-start text-left font-normal",
+            "w-full h-9 justify-start text-left font-normal",
             !date && "text-muted-foreground",
           )}
           disabled={disabled}
@@ -264,7 +264,7 @@ export const WorkLogSheet = ({
                   }
                   value={form.moodScore}
                 >
-                  <SelectTrigger className="w-full h-10 min-h-10">
+                  <SelectTrigger className="w-full h-9 min-h-9">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent position="popper">
@@ -293,7 +293,7 @@ export const WorkLogSheet = ({
                   }
                   value={form.productivityScore}
                 >
-                  <SelectTrigger className="w-full h-10 min-h-10">
+                  <SelectTrigger className="w-full h-9 min-h-9">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent position="popper">
@@ -366,6 +366,7 @@ export const WorkLogSheet = ({
                 onClick={resetForm}
                 type="button"
                 variant="outline"
+                size="lg"
               >
                 <UilRedo/>
                 Reset form
@@ -373,6 +374,7 @@ export const WorkLogSheet = ({
               <Button
                 isLoading={isSubmitting}
                 type="submit"
+                size="lg"
                 variant={isEditMode ? "warning" : "success"}
               >
                 <UilPlusCircle aria-hidden="true" data-icon="inline-start" />

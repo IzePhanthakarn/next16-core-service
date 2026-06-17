@@ -316,7 +316,7 @@ export const WorkLogsPage = () => {
                 {getProductivityScoreLabel(log.productivity_score)}
               </TableCell>
               <TableCell>
-                <div className="flex justify-center max-w-[240px] flex-wrap gap-1">
+                <div className="flex justify-center max-w-60 flex-wrap gap-1">
                   {log.tags.map((tag) => (
                     <span
                       className="rounded-md bg-secondary px-2 py-0.5 text-xs text-secondary-foreground"
@@ -397,7 +397,7 @@ export const WorkLogsPage = () => {
             mode="create"
             onSaved={reloadWorkLogs}
             trigger={
-              <Button type="button" variant="success" className="w-fit font-medium">
+              <Button type="button" variant="success" size="lg" className="w-fit font-medium">
                 <UilPlusCircle aria-hidden="true" data-icon="inline-start" />
                 Add
               </Button>
@@ -450,7 +450,7 @@ export const WorkLogsPage = () => {
               }
               value={filters.month}
             >
-              <SelectTrigger className="h-10 min-h-10 w-full">
+              <SelectTrigger className="h-9 min-h-9 w-full">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent position="popper">
@@ -476,7 +476,7 @@ export const WorkLogsPage = () => {
               }
               value={filters.year}
             >
-              <SelectTrigger className="h-10 min-h-10 w-full">
+              <SelectTrigger className="h-9 min-h-9 w-full">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent position="popper">
@@ -495,7 +495,7 @@ export const WorkLogsPage = () => {
             className="w-full lg:w-auto"
             isLoading={isLoading}
             variant="info"
-            size="xl"
+            size="lg"
             type="submit"
           >
             <UilSearch aria-hidden="true" data-icon="inline-start" />

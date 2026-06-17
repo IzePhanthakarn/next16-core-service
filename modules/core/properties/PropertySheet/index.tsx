@@ -136,11 +136,12 @@ export const PropertySheet = ({ onSaved, trigger }: PropertySheetProps) => {
               onClick={resetForm}
               type="button"
               variant="outline"
+              size="lg"
             >
               <UilRedo aria-hidden="true" data-icon="inline-start" />
               Reset form
             </Button>
-            <Button isLoading={isSubmitting} type="submit" variant="success">
+            <Button isLoading={isSubmitting} type="submit" variant="success" size="lg">
               <UilPlusCircle aria-hidden="true" data-icon="inline-start" />
               Add property
             </Button>
