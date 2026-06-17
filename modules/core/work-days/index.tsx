@@ -20,21 +20,24 @@ import {
   workDayEventToneClassNames,
   workDayWeekdays,
 } from "./models";
+import { useRouter } from "next/navigation";
+import PAGE_ROUTE from "@/constants/page_route";
 
 export const WorkDaysPage = () => {
+  const router = useRouter()
   const [visibleMonth, setVisibleMonth] = useState(
-    () => new Date(new Date().getFullYear(), new Date().getMonth(), 1)
+    () => new Date(new Date().getFullYear(), new Date().getMonth(), 1),
   );
   const calendarDays = useMemo(
     () => getCalendarMonth(visibleMonth, sampleWorkDayEvents),
-    [visibleMonth]
+    [visibleMonth],
   );
   const eventCount = sampleWorkDayEvents.filter((event) =>
     event.date.startsWith(
       `${visibleMonth.getFullYear()}-${(visibleMonth.getMonth() + 1)
         .toString()
-        .padStart(2, "0")}`
-    )
+        .padStart(2, "0")}`,
+    ),
   ).length;
 
   return (
@@ -49,10 +52,20 @@ export const WorkDaysPage = () => {
             Plan and review work days in a monthly calendar.
           </p>
         </div>
-        <Button className="w-fit font-medium" type="button" variant="success">
-          <Plus aria-hidden="true" data-icon="inline-start" />
-          Add
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            className="w-fit border-2 border-border dark:border-input"
+            type="button"
+            variant="secondary"
+            onClick={() => router.push(PAGE_ROUTE.WORK_DAYS.HOLIDAY)}
+          >
+            Holidays
+          </Button>
+          <Button className="w-fit font-medium" type="button" variant="success">
+            <Plus aria-hidden="true" data-icon="inline-start" />
+            Add
+          </Button>
+        </div>
       </div>
 
       <Separator />
@@ -63,7 +76,7 @@ export const WorkDaysPage = () => {
             <div className="grid h-16 w-16 overflow-hidden rounded-lg border bg-background text-center shadow-sm">
               <div className="flex items-center justify-center bg-foreground text-xs font-semibold uppercase text-background">
                 {new Intl.DateTimeFormat("en-US", { month: "short" }).format(
-                  new Date()
+                  new Date(),
                 )}
               </div>
               <div className="flex items-center justify-center text-2xl font-semibold">
@@ -82,7 +95,9 @@ export const WorkDaysPage = () => {
               <div className="mt-2 flex items-center gap-2 text-sm text-muted-foreground">
                 <Button
                   aria-label="Previous month"
-                  onClick={() => setVisibleMonth((month) => getPreviousMonth(month))}
+                  onClick={() =>
+                    setVisibleMonth((month) => getPreviousMonth(month))
+                  }
                   size="icon-sm"
                   type="button"
                   variant="outline"
@@ -92,7 +107,9 @@ export const WorkDaysPage = () => {
                 <span>{getMonthRangeLabel(visibleMonth)}</span>
                 <Button
                   aria-label="Next month"
-                  onClick={() => setVisibleMonth((month) => getNextMonth(month))}
+                  onClick={() =>
+                    setVisibleMonth((month) => getNextMonth(month))
+                  }
                   size="icon-sm"
                   type="button"
                   variant="outline"
@@ -107,7 +124,7 @@ export const WorkDaysPage = () => {
             <Button
               onClick={() =>
                 setVisibleMonth(
-                  new Date(new Date().getFullYear(), new Date().getMonth(), 1)
+                  new Date(new Date().getFullYear(), new Date().getMonth(), 1),
                 )
               }
               type="button"
@@ -135,7 +152,7 @@ export const WorkDaysPage = () => {
             <div
               className={cn(
                 "min-h-30 border-r border-b bg-background p-2 last:border-r-0 sm:min-h-34 lg:min-h-38",
-                !day.isCurrentMonth && "bg-muted/20 text-muted-foreground"
+                !day.isCurrentMonth && "bg-muted/20 text-muted-foreground",
               )}
               key={day.key}
             >
@@ -147,7 +164,7 @@ export const WorkDaysPage = () => {
                       "bg-foreground text-background dark:bg-foreground dark:text-background",
                     !day.isToday &&
                       !day.isCurrentMonth &&
-                      "font-medium text-muted-foreground/70"
+                      "font-medium text-muted-foreground/70",
                   )}
                 >
                   {day.dayOfMonth}
@@ -159,7 +176,7 @@ export const WorkDaysPage = () => {
                   <div
                     className={cn(
                       "flex h-8 min-w-0 items-center gap-2 rounded-md border px-2 text-xs font-medium",
-                      workDayEventToneClassNames[event.tone]
+                      workDayEventToneClassNames[event.tone],
                     )}
                     key={event.id}
                     title={event.title}

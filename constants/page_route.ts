@@ -6,6 +6,7 @@ const PAGE_ROUTE = {
     },
     WORK_DAYS: {
         INDEX: "/work-days",
+        HOLIDAY: "/work-days/holidays"
     },
     PROPERTIES: {
         INDEX: "/properties",
