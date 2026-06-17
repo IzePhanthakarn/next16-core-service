@@ -1,4 +1,35 @@
+import { isAxiosError } from "axios";
+
+import WORK_DAYS_API from "@/constants/api/work-days";
+import apiClient from "@/lib/api-client";
+
 import { type WorkDayCalendarCell, type WorkDayEvent } from "./models";
+import type { WorkDayEventsQuery, WorkDayEventsResponse } from "./models";
+
+export const getWorkDayEvents = async (query: WorkDayEventsQuery = {}) => {
+  const response = await apiClient.get<WorkDayEventsResponse>(
+    WORK_DAYS_API.EVENTS,
+    { params: query },
+  );
+
+  return response.data.data;
+};
+
+export const getWorkDayEventsErrorMessage = (error: unknown) => {
+  if (isAxiosError(error)) {
+    return (
+      error.response?.data?.message ||
+      error.response?.data?.error ||
+      error.message
+    );
+  }
+
+  if (error instanceof Error) {
+    return error.message;
+  }
+
+  return "Failed to load work day events.";
+};
 
 const dateKeyFormatter = new Intl.DateTimeFormat("en-CA", {
   day: "2-digit",

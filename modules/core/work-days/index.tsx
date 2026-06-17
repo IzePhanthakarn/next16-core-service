@@ -1,13 +1,33 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import {
+  type FormEvent,
+  type ReactNode,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 
+import { LineMdLoadingLoop } from "@/assets/icons/LineMdLoadingLoop";
 import { UilCalendarAlt } from "@/assets/icons/UilCalendarAlt";
+import { UilSearch } from "@/assets/icons/UilSearch";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
+import { monthOptions, yearOption } from "@/constants/datetime";
 import { cn } from "@/lib/utils";
 
 import {
+  getWorkDayEvents,
+  getWorkDayEventsErrorMessage,
   getCalendarMonth,
   getMonthRangeLabel,
   getMonthTitle,
@@ -15,32 +35,202 @@ import {
   getPreviousMonth,
 } from "./functions";
 import {
-  sampleWorkDayEvents,
-  workDayEventToneClassNames,
+  emptyWorkDayEvents,
+  type WorkDayEventsData,
+  type WorkDayEventTag,
+  workDayEventTagClassNames,
+  workDayEventTagOptions,
   workDayWeekdays,
 } from "./models";
-import { useRouter } from "next/navigation";
-import PAGE_ROUTE from "@/constants/page_route";
-import { UilPlusCircle } from "@/assets/icons/UilPlusCircle";
 import { UilAngleLeft } from "@/assets/icons/UilAngleLeft";
 import { UilAngleRight } from "@/assets/icons/UilAngleRight";
+import { UilPlusCircle } from "@/assets/icons/UilPlusCircle";
+import PAGE_ROUTE from "@/constants/page_route";
+import { useRouter } from "next/navigation";
+
+type WorkDaysFilterState = {
+  month: string;
+  tag: WorkDayEventTag | "all";
+  year: string;
+};
+
+const getDefaultFilters = (): WorkDaysFilterState => {
+  const today = new Date();
+
+  return {
+    month: (today.getMonth() + 1).toString().padStart(2, "0"),
+    tag: "all",
+    year: today.getFullYear().toString(),
+  };
+};
+
+const defaultFilters = getDefaultFilters();
+
+const getVisibleMonthFromFilters = (filters: WorkDaysFilterState) =>
+  new Date(Number(filters.year), Number(filters.month) - 1, 1);
+
+const buildFilterQuery = (filters: WorkDaysFilterState) => ({
+  month: Number(filters.month),
+  ...(filters.tag !== "all" ? { tag: filters.tag } : {}),
+  year: Number(filters.year),
+});
+
+const getFiltersFromDate = (
+  date: Date,
+  tag: WorkDaysFilterState["tag"],
+): WorkDaysFilterState => ({
+  month: (date.getMonth() + 1).toString().padStart(2, "0"),
+  tag,
+  year: date.getFullYear().toString(),
+});
+
+const useWorkDayEvents = () => {
+  const [events, setEvents] =
+    useState<WorkDayEventsData>(emptyWorkDayEvents);
+  const [filters, setFilters] = useState<WorkDaysFilterState>(defaultFilters);
+  const [appliedFilters, setAppliedFilters] =
+    useState<WorkDaysFilterState>(defaultFilters);
+  const [isLoading, setIsLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState("");
+
+  const visibleMonth = useMemo(
+    () => getVisibleMonthFromFilters(appliedFilters),
+    [appliedFilters],
+  );
+  const query = useMemo(
+    () => buildFilterQuery(appliedFilters),
+    [appliedFilters],
+  );
+
+  useEffect(() => {
+    const loadEvents = async () => {
+      setIsLoading(true);
+      setErrorMessage("");
+
+      try {
+        const data = await getWorkDayEvents(query);
+        setEvents(data);
+      } catch (error) {
+        setEvents(emptyWorkDayEvents);
+        setErrorMessage(getWorkDayEventsErrorMessage(error));
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    void loadEvents();
+  }, [query]);
+
+  const handleSearch = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setAppliedFilters(filters);
+  };
+
+  const goToMonth = (date: Date) => {
+    const nextFilters = getFiltersFromDate(date, appliedFilters.tag);
+
+    setFilters(nextFilters);
+    setAppliedFilters(nextFilters);
+  };
+
+  return {
+    errorMessage,
+    events,
+    filters,
+    goToMonth,
+    handleSearch,
+    isLoading,
+    setFilters,
+    visibleMonth,
+  };
+};
 
 export const WorkDaysPage = () => {
-  const router = useRouter()
-  const [visibleMonth, setVisibleMonth] = useState(
-    () => new Date(new Date().getFullYear(), new Date().getMonth(), 1),
-  );
+  const router = useRouter();
+  const {
+    errorMessage,
+    events,
+    filters,
+    goToMonth,
+    handleSearch,
+    isLoading,
+    setFilters,
+    visibleMonth,
+  } = useWorkDayEvents();
   const calendarDays = useMemo(
-    () => getCalendarMonth(visibleMonth, sampleWorkDayEvents),
-    [visibleMonth],
+    () => getCalendarMonth(visibleMonth, events.items),
+    [events.items, visibleMonth],
   );
-  const eventCount = sampleWorkDayEvents.filter((event) =>
-    event.date.startsWith(
-      `${visibleMonth.getFullYear()}-${(visibleMonth.getMonth() + 1)
-        .toString()
-        .padStart(2, "0")}`,
-    ),
-  ).length;
+  const eventCount = events.total_events;
+  let calendarContent: ReactNode;
+
+  if (isLoading) {
+    calendarContent = (
+      <div className="flex min-h-[456px] items-center justify-center px-4 py-6 text-sm text-muted-foreground">
+        <LineMdLoadingLoop className="h-10 w-10" />
+      </div>
+    );
+  } else if (errorMessage) {
+    calendarContent = (
+      <div className="flex min-h-[456px] items-center justify-center px-4 py-6 text-sm text-destructive">
+        {errorMessage}
+      </div>
+    );
+  } else {
+    calendarContent = (
+      <div className="grid grid-cols-7">
+        {calendarDays.map((day) => (
+          <div
+            className={cn(
+              "min-h-30 border-r border-b bg-background p-2 last:border-r-0 sm:min-h-34 lg:min-h-38",
+              !day.isCurrentMonth && "bg-muted/20 text-muted-foreground",
+            )}
+            key={day.key}
+          >
+            <div className="mb-2 flex h-7 items-center">
+              <span
+                className={cn(
+                  "flex h-7 min-w-7 items-center justify-center rounded-full px-2 text-sm font-semibold",
+                  day.isToday &&
+                    "bg-foreground text-background dark:bg-foreground dark:text-background",
+                  !day.isToday &&
+                    !day.isCurrentMonth &&
+                    "font-medium text-muted-foreground/70",
+                )}
+              >
+                {day.dayOfMonth}
+              </span>
+            </div>
+
+            <div className="space-y-1">
+              {day.events.slice(0, 3).map((event) => (
+                <div
+                  className={cn(
+                    "flex h-8 min-w-0 items-center gap-2 rounded-md border px-2 text-xs font-medium",
+                    workDayEventTagClassNames[event.tag],
+                  )}
+                  key={event.id}
+                  title={event.title}
+                >
+                  <span className="truncate">{event.title}</span>
+                  {event.time ? (
+                    <span className="ml-auto shrink-0 tabular-nums">
+                      {event.time}
+                    </span>
+                  ) : null}
+                </div>
+              ))}
+              {day.events.length > 3 ? (
+                <div className="px-1 text-xs font-medium text-muted-foreground">
+                  {day.events.length - 3} more...
+                </div>
+              ) : null}
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
 
   return (
     <section className="mx-auto flex w-full max-w-7xl flex-col gap-4">
@@ -97,9 +287,7 @@ export const WorkDaysPage = () => {
               <div className="mt-2 flex items-center gap-2 text-sm text-muted-foreground">
                 <Button
                   aria-label="Previous month"
-                  onClick={() =>
-                    setVisibleMonth((month) => getPreviousMonth(month))
-                  }
+                  onClick={() => goToMonth(getPreviousMonth(visibleMonth))}
                   size="icon-sm"
                   type="button"
                   variant="outline"
@@ -109,9 +297,7 @@ export const WorkDaysPage = () => {
                 <span>{getMonthRangeLabel(visibleMonth)}</span>
                 <Button
                   aria-label="Next month"
-                  onClick={() =>
-                    setVisibleMonth((month) => getNextMonth(month))
-                  }
+                  onClick={() => goToMonth(getNextMonth(visibleMonth))}
                   size="icon-sm"
                   type="button"
                   variant="outline"
@@ -122,20 +308,109 @@ export const WorkDaysPage = () => {
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2">
+          <form
+            className="grid gap-3 sm:grid-cols-[120px_120px_160px_auto] sm:items-end"
+            onSubmit={handleSearch}
+          >
+            <div className="grid gap-2">
+              <Label htmlFor="work-day-year">Year</Label>
+              <Select
+                onValueChange={(year) =>
+                  setFilters((value) => ({
+                    ...value,
+                    year,
+                  }))
+                }
+                value={filters.year}
+              >
+                <SelectTrigger
+                  className="h-10 min-h-10 w-full"
+                  id="work-day-year"
+                >
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent position="popper">
+                  <SelectGroup>
+                    {yearOption.map((year) => (
+                      <SelectItem key={year.value} value={year.value}>
+                        {year.label}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="work-day-month">Month</Label>
+              <Select
+                onValueChange={(month) =>
+                  setFilters((value) => ({
+                    ...value,
+                    month,
+                  }))
+                }
+                value={filters.month}
+              >
+                <SelectTrigger
+                  className="h-10 min-h-10 w-full"
+                  id="work-day-month"
+                >
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent position="popper">
+                  <SelectGroup>
+                    {monthOptions.map((month) => (
+                      <SelectItem key={month.value} value={month.value}>
+                        {month.label}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="work-day-tag">Tag</Label>
+              <Select
+                onValueChange={(tag) =>
+                  setFilters((value) => ({
+                    ...value,
+                    tag: tag as WorkDaysFilterState["tag"],
+                  }))
+                }
+                value={filters.tag}
+              >
+                <SelectTrigger
+                  className="h-10 min-h-10 w-full"
+                  id="work-day-tag"
+                >
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent position="popper">
+                  <SelectGroup>
+                    <SelectItem value="all">All tags</SelectItem>
+                    {workDayEventTagOptions.map((tag) => (
+                      <SelectItem key={tag.value} value={tag.value}>
+                        {tag.label}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            </div>
+
             <Button
-              onClick={() =>
-                setVisibleMonth(
-                  new Date(new Date().getFullYear(), new Date().getMonth(), 1),
-                )
-              }
-              type="button"
-              variant="outline"
+              className="w-full sm:w-auto"
+              isLoading={isLoading}
+              size="xl"
+              type="submit"
+              variant="info"
             >
-              <UilCalendarAlt aria-hidden="true" data-icon="inline-start" />
-              Today
+              <UilSearch aria-hidden="true" data-icon="inline-start" />
+              Search
             </Button>
-          </div>
+          </form>
         </div>
 
         <div className="grid grid-cols-7 border-b bg-muted/40">
@@ -149,57 +424,7 @@ export const WorkDaysPage = () => {
           ))}
         </div>
 
-        <div className="grid grid-cols-7">
-          {calendarDays.map((day) => (
-            <div
-              className={cn(
-                "min-h-30 border-r border-b bg-background p-2 last:border-r-0 sm:min-h-34 lg:min-h-38",
-                !day.isCurrentMonth && "bg-muted/20 text-muted-foreground",
-              )}
-              key={day.key}
-            >
-              <div className="mb-2 flex h-7 items-center">
-                <span
-                  className={cn(
-                    "flex h-7 min-w-7 items-center justify-center rounded-full px-2 text-sm font-semibold",
-                    day.isToday &&
-                      "bg-foreground text-background dark:bg-foreground dark:text-background",
-                    !day.isToday &&
-                      !day.isCurrentMonth &&
-                      "font-medium text-muted-foreground/70",
-                  )}
-                >
-                  {day.dayOfMonth}
-                </span>
-              </div>
-
-              <div className="space-y-1">
-                {day.events.slice(0, 3).map((event) => (
-                  <div
-                    className={cn(
-                      "flex h-8 min-w-0 items-center gap-2 rounded-md border px-2 text-xs font-medium",
-                      workDayEventToneClassNames[event.tone],
-                    )}
-                    key={event.id}
-                    title={event.title}
-                  >
-                    <span className="truncate">{event.title}</span>
-                    {event.time ? (
-                      <span className="ml-auto shrink-0 tabular-nums">
-                        {event.time}
-                      </span>
-                    ) : null}
-                  </div>
-                ))}
-                {day.events.length > 3 ? (
-                  <div className="px-1 text-xs font-medium text-muted-foreground">
-                    {day.events.length - 3} more...
-                  </div>
-                ) : null}
-              </div>
-            </div>
-          ))}
-        </div>
+        {calendarContent}
       </div>
     </section>
   );

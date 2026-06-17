@@ -1,6 +1,7 @@
 const WORK_DAYS_BASE_PATH = "/work-days";
 
 const WORK_DAYS_API = {
+    EVENTS: `${WORK_DAYS_BASE_PATH}/events`,
     HOLIDAYS: `${WORK_DAYS_BASE_PATH}/holidays`,
     HOLIDAY_FETCH: `${WORK_DAYS_BASE_PATH}/holiday-fetch`,
 } as const;
