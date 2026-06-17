@@ -1,6 +1,5 @@
 "use client";
 
-import { RefreshCwIcon, RotateCcwIcon } from "lucide-react";
 import { type FormEvent, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -22,6 +21,8 @@ import {
   syncHolidays,
 } from "./functions";
 import type { HolidaySheetFormState, HolidaySheetProps } from "./models";
+import { UilSync } from "@/assets/icons/UilSync";
+import { UilRedo } from "@/assets/icons/UilRedo";
 
 export const HolidaySheet = ({ onSynced, trigger }: HolidaySheetProps) => {
   const [open, setOpen] = useState(false);
@@ -96,11 +97,11 @@ export const HolidaySheet = ({ onSynced, trigger }: HolidaySheetProps) => {
               type="button"
               variant="outline"
             >
-              <RotateCcwIcon aria-hidden="true" data-icon="inline-start" />
+              <UilRedo />
               Reset
             </Button>
             <Button isLoading={isSubmitting} type="submit" variant="info">
-              <RefreshCwIcon aria-hidden="true" data-icon="inline-start" />
+              <UilSync/>
               Sync
             </Button>
           </SheetFooter>

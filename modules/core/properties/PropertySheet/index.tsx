@@ -1,6 +1,5 @@
 "use client";
 
-import { RotateCcwIcon } from "lucide-react";
 import { type FormEvent, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -28,6 +27,7 @@ import {
 } from "./functions";
 import type { PropertySheetFormState, PropertySheetProps } from "./models";
 import { UilPlusCircle } from "@/assets/icons/UilPlusCircle";
+import { UilRedo } from "@/assets/icons/UilRedo";
 
 export const PropertySheet = ({ onSaved, trigger }: PropertySheetProps) => {
   const [open, setOpen] = useState(false);
@@ -137,7 +137,7 @@ export const PropertySheet = ({ onSaved, trigger }: PropertySheetProps) => {
               type="button"
               variant="outline"
             >
-              <RotateCcwIcon aria-hidden="true" data-icon="inline-start" />
+              <UilRedo aria-hidden="true" data-icon="inline-start" />
               Reset form
             </Button>
             <Button isLoading={isSubmitting} type="submit" variant="success">

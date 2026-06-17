@@ -6,7 +6,6 @@ import { UilCalendarAlt } from "@/assets/icons/UilCalendarAlt";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
-import { CalendarDays, ChevronLeft, ChevronRight, Plus } from "lucide-react";
 
 import {
   getCalendarMonth,
@@ -22,6 +21,9 @@ import {
 } from "./models";
 import { useRouter } from "next/navigation";
 import PAGE_ROUTE from "@/constants/page_route";
+import { UilPlusCircle } from "@/assets/icons/UilPlusCircle";
+import { UilAngleLeft } from "@/assets/icons/UilAngleLeft";
+import { UilAngleRight } from "@/assets/icons/UilAngleRight";
 
 export const WorkDaysPage = () => {
   const router = useRouter()
@@ -62,7 +64,7 @@ export const WorkDaysPage = () => {
             Holidays
           </Button>
           <Button className="w-fit font-medium" type="button" variant="success">
-            <Plus aria-hidden="true" data-icon="inline-start" />
+            <UilPlusCircle aria-hidden="true" data-icon="inline-start" />
             Add
           </Button>
         </div>
@@ -102,7 +104,7 @@ export const WorkDaysPage = () => {
                   type="button"
                   variant="outline"
                 >
-                  <ChevronLeft aria-hidden="true" />
+                  <UilAngleLeft aria-hidden="true" />
                 </Button>
                 <span>{getMonthRangeLabel(visibleMonth)}</span>
                 <Button
@@ -114,7 +116,7 @@ export const WorkDaysPage = () => {
                   type="button"
                   variant="outline"
                 >
-                  <ChevronRight aria-hidden="true" />
+                  <UilAngleRight aria-hidden="true" />
                 </Button>
               </div>
             </div>
@@ -130,7 +132,7 @@ export const WorkDaysPage = () => {
               type="button"
               variant="outline"
             >
-              <CalendarDays aria-hidden="true" data-icon="inline-start" />
+              <UilCalendarAlt aria-hidden="true" data-icon="inline-start" />
               Today
             </Button>
           </div>

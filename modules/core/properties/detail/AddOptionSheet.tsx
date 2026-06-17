@@ -1,6 +1,5 @@
 "use client";
 
-import { RotateCcwIcon } from "lucide-react";
 import { type ReactNode, useState } from "react";
 
 import { UilPlusCircle } from "@/assets/icons/UilPlusCircle";
@@ -19,6 +18,7 @@ import { appToast } from "@/lib/toast";
 
 import { createPropertyOption, getPropertyDetailErrorMessage } from "./functions";
 import type { PropertyOption } from "./models";
+import { UilRedo } from "@/assets/icons/UilRedo";
 
 type AddOptionSheetProps = {
   propertyTypeId: string;
@@ -128,7 +128,7 @@ export const AddOptionSheet = ({
               type="button"
               variant="outline"
             >
-              <RotateCcwIcon aria-hidden="true" data-icon="inline-start" />
+              <UilRedo aria-hidden="true" data-icon="inline-start" />
               Reset form
             </Button>
             <Button isLoading={isSubmitting} type="submit" variant="success">

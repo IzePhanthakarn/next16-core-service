@@ -62,6 +62,7 @@ import {
 } from "@/components/ui/combobox";
 import type { CachedPropertyOption } from "@/modules/core/properties/models";
 import PROPERTY_TYPES from "@/constants/properties";
+import { UilRedo } from "@/assets/icons/UilRedo";
 
 type DateLoggedPickerProps = {
   date?: Date;
@@ -366,7 +367,7 @@ export const WorkLogSheet = ({
                 type="button"
                 variant="outline"
               >
-                <RotateCcwIcon aria-hidden="true" data-icon="inline-start" />
+                <UilRedo/>
                 Reset form
               </Button>
               <Button

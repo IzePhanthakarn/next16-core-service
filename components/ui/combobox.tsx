@@ -15,7 +15,7 @@ import { ChevronDownIcon, XIcon, CheckIcon } from "lucide-react"
 
 const Combobox = ComboboxPrimitive.Root
 
-function ComboboxValue({ ...props }: ComboboxPrimitive.Value.Props) {
+function ComboboxValue({ ...props }: Readonly<ComboboxPrimitive.Value.Props>) {
   return <ComboboxPrimitive.Value data-slot="combobox-value" {...props} />
 }
 
@@ -23,7 +23,7 @@ function ComboboxTrigger({
   className,
   children,
   ...props
-}: ComboboxPrimitive.Trigger.Props) {
+}: Readonly<ComboboxPrimitive.Trigger.Props>) {
   return (
     <ComboboxPrimitive.Trigger
       data-slot="combobox-trigger"
@@ -36,7 +36,7 @@ function ComboboxTrigger({
   )
 }
 
-function ComboboxClear({ className, ...props }: ComboboxPrimitive.Clear.Props) {
+function ComboboxClear({ className, ...props }: Readonly<ComboboxPrimitive.Clear.Props>) {
   return (
     <ComboboxPrimitive.Clear
       data-slot="combobox-clear"

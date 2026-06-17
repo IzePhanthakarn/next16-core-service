@@ -3,8 +3,6 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
-import { RefreshCwIcon } from "lucide-react";
-
 import { LineMdLoadingLoop } from "@/assets/icons/LineMdLoadingLoop";
 import { UilCalendarAlt } from "@/assets/icons/UilCalendarAlt";
 import { UilSearch } from "@/assets/icons/UilSearch";
@@ -30,6 +28,7 @@ import {
 } from "./functions";
 import { HolidaySheet } from "./HolidaySheet";
 import type { HolidayData } from "./models";
+import { UilSync } from "@/assets/icons/UilSync";
 
 const AVAILABLE_YEARS = [2026, 2027];
 const CURRENT_YEAR = new Date().getFullYear();
@@ -135,7 +134,7 @@ export const HolidaysPage = () => {
             onSynced={reload}
             trigger={
               <Button size="lg" type="button" variant="success">
-                <RefreshCwIcon aria-hidden="true" data-icon="inline-start" />
+                <UilSync />
                 Sync Holidays
               </Button>
             }
@@ -218,7 +217,7 @@ export const HolidaysPage = () => {
                 aria-label="Remaining holidays progress"
                 className={cn(
                   "h-2 w-full",
-                  "[&_[data-slot=progress-indicator]]:bg-primary",
+                  "**:data-[slot=progress-indicator]:bg-primary",
                 )}
                 value={remainingHolidayProgress}
               />
