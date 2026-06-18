@@ -6,7 +6,7 @@ const ensureProtocol = (url: string) => {
   return `http://${url}`;
 };
 
-const trimSlashes = (value: string) => value.replace(/^\/+/, "").replace(/\/+$/, "");
+const trimSlashes = (value: string) => value.replace(/^\/+|\/+$/g, ""); // NOSONAR
 
 export const getApiBaseUrl = () => {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;

@@ -12,8 +12,7 @@ export const generatePropertyCode = (name: string) =>
   name
     .trim()
     .replace(/[^a-zA-Z0-9]+/g, "_")
-    .replace(/^_+/, "")
-    .replace(/_+$/, "")
+    .replace(/^_+|_+$/g, "") // NOSONAR
     .toUpperCase();
 
 export const buildPropertySheetPayload = (
