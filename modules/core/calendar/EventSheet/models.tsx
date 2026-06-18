@@ -1,4 +1,4 @@
-import type { WorkDayEvent, WorkDayEventTag } from "../models";
+import type { CalendarEvent, CalendarEventTag } from "../models";
 
 export type EventSheetMode = "create" | "view" | "edit";
 
@@ -9,11 +9,11 @@ export type EventSheetFormState = {
   startTime: string;
   endDate?: Date;
   endTime: string;
-  tag: WorkDayEventTag | "";
+  tag: CalendarEventTag | "";
 };
 
 export type EventSheetProps = {
-  event?: WorkDayEvent;
+  event?: CalendarEvent;
   mode: EventSheetMode;
   onSaved?: () => void;
   open?: boolean;

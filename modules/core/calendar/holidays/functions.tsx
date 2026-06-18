@@ -1,13 +1,13 @@
 import { isAxiosError } from "axios";
 
-import WORK_DAYS_API from "@/constants/api/work-days";
+import CALENDAR_API from "@/constants/api/calendar";
 import apiClient from "@/lib/api-client";
 
 import type { Holiday, HolidayResponse } from "./models";
 
 export const getHolidays = async (year: number) => {
   const response = await apiClient.get<HolidayResponse>(
-    WORK_DAYS_API.HOLIDAYS,
+    CALENDAR_API.HOLIDAYS,
     { params: { year } },
   );
 

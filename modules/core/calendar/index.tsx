@@ -26,8 +26,8 @@ import { monthOptions, yearOption } from "@/constants/datetime";
 import { cn } from "@/lib/utils";
 
 import {
-  getWorkDayEvents,
-  getWorkDayEventsErrorMessage,
+  getCalendarEvents,
+  getCalendarEventsErrorMessage,
   getCalendarMonth,
   getMonthRangeLabel,
   getMonthTitle,
@@ -35,13 +35,13 @@ import {
   getPreviousMonth,
 } from "./functions";
 import {
-  emptyWorkDayEvents,
-  type WorkDayEventsData,
-  type WorkDayEvent,
-  type WorkDayEventTag,
-  workDayEventTagClassNames,
-  workDayEventTagOptions,
-  workDayWeekdays,
+  emptyCalendarEvents,
+  type CalendarEventsData,
+  type CalendarEvent,
+  type CalendarEventTag,
+  calendarEventTagClassNames,
+  calendarEventTagOptions,
+  calendarWeekdays,
 } from "./models";
 import { UilAngleLeft } from "@/assets/icons/UilAngleLeft";
 import { UilAngleRight } from "@/assets/icons/UilAngleRight";
@@ -51,13 +51,13 @@ import { useRouter } from "next/navigation";
 import { EventSheet } from "./EventSheet";
 import type { EventSheetMode } from "./EventSheet/models";
 
-type WorkDaysFilterState = {
+type CalendarFilterState = {
   month: string;
-  tag: WorkDayEventTag | "all";
+  tag: CalendarEventTag | "all";
   year: string;
 };
 
-const getDefaultFilters = (): WorkDaysFilterState => {
+const getDefaultFilters = (): CalendarFilterState => {
   const today = new Date();
 
   return {
@@ -69,10 +69,10 @@ const getDefaultFilters = (): WorkDaysFilterState => {
 
 const defaultFilters = getDefaultFilters();
 
-const getVisibleMonthFromFilters = (filters: WorkDaysFilterState) =>
+const getVisibleMonthFromFilters = (filters: CalendarFilterState) =>
   new Date(Number(filters.year), Number(filters.month) - 1, 1);
 
-const buildFilterQuery = (filters: WorkDaysFilterState) => ({
+const buildFilterQuery = (filters: CalendarFilterState) => ({
   month: Number(filters.month),
   ...(filters.tag !== "all" ? { tag: filters.tag } : {}),
   year: Number(filters.year),
@@ -80,19 +80,19 @@ const buildFilterQuery = (filters: WorkDaysFilterState) => ({
 
 const getFiltersFromDate = (
   date: Date,
-  tag: WorkDaysFilterState["tag"],
-): WorkDaysFilterState => ({
+  tag: CalendarFilterState["tag"],
+): CalendarFilterState => ({
   month: (date.getMonth() + 1).toString().padStart(2, "0"),
   tag,
   year: date.getFullYear().toString(),
 });
 
-const useWorkDayEvents = () => {
+const useCalendarEvents = () => {
   const [events, setEvents] =
-    useState<WorkDayEventsData>(emptyWorkDayEvents);
-  const [filters, setFilters] = useState<WorkDaysFilterState>(defaultFilters);
+    useState<CalendarEventsData>(emptyCalendarEvents);
+  const [filters, setFilters] = useState<CalendarFilterState>(defaultFilters);
   const [appliedFilters, setAppliedFilters] =
-    useState<WorkDaysFilterState>(defaultFilters);
+    useState<CalendarFilterState>(defaultFilters);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
 
@@ -111,11 +111,11 @@ const useWorkDayEvents = () => {
       setErrorMessage("");
 
       try {
-        const data = await getWorkDayEvents(query);
+        const data = await getCalendarEvents(query);
         setEvents(data);
       } catch (error) {
-        setEvents(emptyWorkDayEvents);
-        setErrorMessage(getWorkDayEventsErrorMessage(error));
+        setEvents(emptyCalendarEvents);
+        setErrorMessage(getCalendarEventsErrorMessage(error));
       } finally {
         setIsLoading(false);
       }
@@ -154,10 +154,10 @@ const useWorkDayEvents = () => {
 type EventSheetState = {
   open: boolean;
   mode: EventSheetMode;
-  event?: WorkDayEvent;
+  event?: CalendarEvent;
 };
 
-export const WorkDaysPage = () => {
+export const CalendarPage = () => {
   const router = useRouter();
   const {
     errorMessage,
@@ -169,7 +169,7 @@ export const WorkDaysPage = () => {
     refreshEvents,
     setFilters,
     visibleMonth,
-  } = useWorkDayEvents();
+  } = useCalendarEvents();
   const calendarDays = useMemo(
     () => getCalendarMonth(visibleMonth, events.items),
     [events.items, visibleMonth],
@@ -225,7 +225,7 @@ export const WorkDaysPage = () => {
                 <button
                   className={cn(
                     "flex h-8 min-w-0 w-full items-center gap-2 rounded-md border px-2 text-xs font-medium cursor-pointer hover:opacity-80 transition-opacity",
-                    workDayEventTagClassNames[event.tag],
+                    calendarEventTagClassNames[event.tag],
                   )}
                   key={event.id}
                   onClick={() => setEventSheet({ open: true, mode: "view", event })}
@@ -258,10 +258,10 @@ export const WorkDaysPage = () => {
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <UilCalendarAlt className="h-9 w-9 text-primary" />
-            <h1 className="text-2xl font-semibold">Work Days</h1>
+            <h1 className="text-2xl font-semibold">Calendar</h1>
           </div>
           <p className="text-sm text-muted-foreground">
-            Plan and review work days in a monthly calendar.
+            Plan and review events in a monthly calendar.
           </p>
         </div>
         <div className="flex gap-2">
@@ -270,7 +270,7 @@ export const WorkDaysPage = () => {
             type="button"
             variant="secondary"
             size="lg"
-            onClick={() => router.push(PAGE_ROUTE.WORK_DAYS.HOLIDAY)}
+            onClick={() => router.push(PAGE_ROUTE.CALENDAR.HOLIDAY)}
           >
             Holidays
           </Button>
@@ -340,7 +340,7 @@ export const WorkDaysPage = () => {
             onSubmit={handleSearch}
           >
             <div className="grid gap-2">
-              <Label htmlFor="work-day-year">Year</Label>
+              <Label htmlFor="calendar-year">Year</Label>
               <Select
                 onValueChange={(year) =>
                   setFilters((value) => ({
@@ -352,7 +352,7 @@ export const WorkDaysPage = () => {
               >
                 <SelectTrigger
                   className="h-9 min-h-9 w-full"
-                  id="work-day-year"
+                  id="calendar-year"
                 >
                   <SelectValue />
                 </SelectTrigger>
@@ -369,7 +369,7 @@ export const WorkDaysPage = () => {
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="work-day-month">Month</Label>
+              <Label htmlFor="calendar-month">Month</Label>
               <Select
                 onValueChange={(month) =>
                   setFilters((value) => ({
@@ -381,7 +381,7 @@ export const WorkDaysPage = () => {
               >
                 <SelectTrigger
                   className="h-9 min-h-9 w-full"
-                  id="work-day-month"
+                  id="calendar-month"
                 >
                   <SelectValue />
                 </SelectTrigger>
@@ -398,26 +398,26 @@ export const WorkDaysPage = () => {
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="work-day-tag">Tag</Label>
+              <Label htmlFor="calendar-tag">Tag</Label>
               <Select
                 onValueChange={(tag) =>
                   setFilters((value) => ({
                     ...value,
-                    tag: tag as WorkDaysFilterState["tag"],
+                    tag: tag as CalendarFilterState["tag"],
                   }))
                 }
                 value={filters.tag}
               >
                 <SelectTrigger
                   className="h-9 min-h-9 w-full"
-                  id="work-day-tag"
+                  id="calendar-tag"
                 >
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent position="popper">
                   <SelectGroup>
                     <SelectItem value="all">All tags</SelectItem>
-                    {workDayEventTagOptions.map((tag) => (
+                    {calendarEventTagOptions.map((tag) => (
                       <SelectItem key={tag.value} value={tag.value}>
                         {tag.label}
                       </SelectItem>
@@ -441,7 +441,7 @@ export const WorkDaysPage = () => {
         </div>
 
         <div className="grid grid-cols-7 border-b bg-muted/40">
-          {workDayWeekdays.map((weekday) => (
+          {calendarWeekdays.map((weekday) => (
             <div
               className="flex h-11 items-center justify-center border-r text-sm font-medium text-muted-foreground last:border-r-0"
               key={weekday}

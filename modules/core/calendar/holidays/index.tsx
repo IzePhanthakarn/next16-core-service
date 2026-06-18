@@ -128,7 +128,7 @@ export const HolidaysPage = () => {
         </div>
         <div className="flex items-center gap-2">
           <Button asChild size="lg" variant="outline">
-            <Link href={PAGE_ROUTE.WORK_DAYS.INDEX}>Back to Work Days</Link>
+            <Link href={PAGE_ROUTE.CALENDAR.INDEX}>Back to Calendar</Link>
           </Button>
           <HolidaySheet
             onSynced={reload}

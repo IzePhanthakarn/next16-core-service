@@ -1,9 +1,9 @@
 import { isAxiosError } from "axios";
 
-import WORK_DAYS_API from "@/constants/api/work-days";
+import CALENDAR_API from "@/constants/api/calendar";
 import apiClient from "@/lib/api-client";
 
-import type { WorkDayEvent } from "../models";
+import type { CalendarEvent } from "../models";
 import type { CreateEventPayload, EventSheetFormState, EventSheetMode } from "./models";
 
 export const getDefaultEventSheetForm = (): EventSheetFormState => ({
@@ -49,7 +49,7 @@ const parseEventDateTime = (isoString?: string): { date?: Date; time: string } =
   return { date: d, time: `${hh}:${mm}` };
 };
 
-export const getEventSheetFormFromEvent = (event?: WorkDayEvent): EventSheetFormState => {
+export const getEventSheetFormFromEvent = (event?: CalendarEvent): EventSheetFormState => {
   if (!event) return getDefaultEventSheetForm();
 
   const start = parseEventDateTime(event.start_date);
@@ -80,18 +80,18 @@ export const buildEventSheetPayload = (form: EventSheetFormState): CreateEventPa
   };
 };
 
-export const createWorkDayEvent = async (payload: CreateEventPayload) => {
-  const response = await apiClient.post(WORK_DAYS_API.EVENTS, payload);
+export const createCalendarEvent = async (payload: CreateEventPayload) => {
+  const response = await apiClient.post(CALENDAR_API.EVENTS, payload);
   return response.data;
 };
 
-export const updateWorkDayEvent = async (id: string, payload: CreateEventPayload) => {
-  const response = await apiClient.put(`${WORK_DAYS_API.EVENTS}/${id}`, payload);
+export const updateCalendarEvent = async (id: string, payload: CreateEventPayload) => {
+  const response = await apiClient.put(`${CALENDAR_API.EVENTS}/${id}`, payload);
   return response.data;
 };
 
-export const deleteWorkDayEvent = async (id: string) => {
-  const response = await apiClient.delete(`${WORK_DAYS_API.EVENTS}/${id}`);
+export const deleteCalendarEvent = async (id: string) => {
+  const response = await apiClient.delete(`${CALENDAR_API.EVENTS}/${id}`);
   return response.data;
 };
 

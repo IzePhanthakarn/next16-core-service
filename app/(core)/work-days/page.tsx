@@ -1,1 +1,0 @@
-export {WorkDaysPage as default} from "@/modules/core/work-days";

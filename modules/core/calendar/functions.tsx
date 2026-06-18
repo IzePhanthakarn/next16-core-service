@@ -1,21 +1,21 @@
 import { isAxiosError } from "axios";
 
-import WORK_DAYS_API from "@/constants/api/work-days";
+import CALENDAR_API from "@/constants/api/calendar";
 import apiClient from "@/lib/api-client";
 
-import { type WorkDayCalendarCell, type WorkDayEvent } from "./models";
-import type { WorkDayEventsQuery, WorkDayEventsResponse } from "./models";
+import { type CalendarCell, type CalendarEvent } from "./models";
+import type { CalendarEventsQuery, CalendarEventsResponse } from "./models";
 
-export const getWorkDayEvents = async (query: WorkDayEventsQuery = {}) => {
-  const response = await apiClient.get<WorkDayEventsResponse>(
-    WORK_DAYS_API.EVENTS,
+export const getCalendarEvents = async (query: CalendarEventsQuery = {}) => {
+  const response = await apiClient.get<CalendarEventsResponse>(
+    CALENDAR_API.EVENTS,
     { params: query },
   );
 
   return response.data.data;
 };
 
-export const getWorkDayEventsErrorMessage = (error: unknown) => {
+export const getCalendarEventsErrorMessage = (error: unknown) => {
   if (isAxiosError(error)) {
     return (
       error.response?.data?.message ||
@@ -28,7 +28,7 @@ export const getWorkDayEventsErrorMessage = (error: unknown) => {
     return error.message;
   }
 
-  return "Failed to load work day events.";
+  return "Failed to load calendar events.";
 };
 
 const dateKeyFormatter = new Intl.DateTimeFormat("en-CA", {
@@ -59,8 +59,8 @@ export const getMonthRangeLabel = (date: Date) => {
 
 export const getCalendarMonth = (
   visibleMonth: Date,
-  events: WorkDayEvent[]
-): WorkDayCalendarCell[] => {
+  events: CalendarEvent[]
+): CalendarCell[] => {
   const year = visibleMonth.getFullYear();
   const month = visibleMonth.getMonth();
   const firstDay = new Date(year, month, 1);
@@ -70,7 +70,7 @@ export const getCalendarMonth = (
   const totalDays =
     Math.round((endDate.getTime() - startDate.getTime()) / 86_400_000) + 1;
   const todayKey = getDateKey(new Date());
-  const eventsByDate = events.reduce<Record<string, WorkDayEvent[]>>(
+  const eventsByDate = events.reduce<Record<string, CalendarEvent[]>>(
     (calendarEvents, event) => {
       calendarEvents[event.date] = [...(calendarEvents[event.date] || []), event];
       return calendarEvents;

@@ -1,4 +1,4 @@
-export type WorkDayEventTag =
+export type CalendarEventTag =
   | "blue"
   | "coral"
   | "gray"
@@ -8,7 +8,7 @@ export type WorkDayEventTag =
   | "terracotta"
   | "amber";
 
-export type WorkDayEvent = {
+export type CalendarEvent = {
   id: string;
   date: string;
   description?: string;
@@ -16,40 +16,40 @@ export type WorkDayEvent = {
   start_date?: string;
   title: string;
   time?: string;
-  tag: WorkDayEventTag;
+  tag: CalendarEventTag;
   user_id?: string;
 };
 
-export type WorkDayEventsData = {
-  items: WorkDayEvent[];
+export type CalendarEventsData = {
+  items: CalendarEvent[];
   total_events: number;
 };
 
-export type WorkDayEventsResponse = {
+export type CalendarEventsResponse = {
   status: string;
   code: number;
   message: string;
-  data: WorkDayEventsData;
+  data: CalendarEventsData;
 };
 
-export type WorkDayEventsQuery = {
+export type CalendarEventsQuery = {
   month?: number;
-  tag?: WorkDayEventTag;
+  tag?: CalendarEventTag;
   year?: number;
 };
 
-export type WorkDayCalendarCell = {
+export type CalendarCell = {
   date: Date;
   dayOfMonth: number;
-  events: WorkDayEvent[];
+  events: CalendarEvent[];
   isCurrentMonth: boolean;
   isToday: boolean;
   key: string;
 };
 
-export const workDayWeekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+export const calendarWeekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
-export const workDayEventTagClassNames: Record<WorkDayEventTag, string> = {
+export const calendarEventTagClassNames: Record<CalendarEventTag, string> = {
   amber:
     "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-300",
   blue:
@@ -68,9 +68,9 @@ export const workDayEventTagClassNames: Record<WorkDayEventTag, string> = {
     "border-[#f1b08a] bg-[#fff3eb] text-[#a54518] dark:border-[#c65f2d]/35 dark:bg-[#c65f2d]/15 dark:text-[#f1b08a]",
 };
 
-export const workDayEventTagOptions: {
+export const calendarEventTagOptions: {
   label: string;
-  value: WorkDayEventTag;
+  value: CalendarEventTag;
 }[] = [
   { label: "Meeting", value: "blue" },
   { label: "Personal Leave", value: "gray" },
@@ -91,7 +91,7 @@ export const workDayEventTagOptions: {
 // 7. Focus Time / Deep Work: สีส้มอิฐ (Terracotta)
 // 8. Incidents / Server Maintenance: สีเหลืองมัสตาร์ด (Amber)
 
-export const emptyWorkDayEvents: WorkDayEventsData = {
+export const emptyCalendarEvents: CalendarEventsData = {
   items: [],
   total_events: 0,
 };

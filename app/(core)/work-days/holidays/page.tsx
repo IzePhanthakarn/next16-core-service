@@ -1,1 +1,0 @@
-export {HolidaysPage as default} from "@/modules/core/work-days/holidays";

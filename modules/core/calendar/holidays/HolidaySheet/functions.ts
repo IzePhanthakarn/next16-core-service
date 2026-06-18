@@ -1,6 +1,6 @@
 import { isAxiosError } from "axios";
 
-import WORK_DAYS_API from "@/constants/api/work-days";
+import CALENDAR_API from "@/constants/api/calendar";
 import apiClient from "@/lib/api-client";
 
 import type { HolidaySheetFormState } from "./models";
@@ -10,7 +10,7 @@ export const getDefaultHolidaySheetForm = (): HolidaySheetFormState => ({
 });
 
 export const syncHolidays = async (form: HolidaySheetFormState) => {
-  const response = await apiClient.post(WORK_DAYS_API.HOLIDAY_FETCH, {
+  const response = await apiClient.post(CALENDAR_API.HOLIDAY_FETCH, {
     path: form.path.trim(),
   });
 

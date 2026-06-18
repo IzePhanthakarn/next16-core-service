@@ -22,8 +22,8 @@ const navItems = [
     icon: <LucideTimer className="w-6 h-6"/>
   },
   {
-    href: PAGE_ROUTE.WORK_DAYS.INDEX,
-    label: "Work Days",
+    href: PAGE_ROUTE.CALENDAR.INDEX,
+    label: "Calendar",
     icon: <UilCalendarAlt className="h-6 w-6" />,
   },
   {

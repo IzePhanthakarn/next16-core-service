@@ -38,17 +38,17 @@ import { appToast } from "@/lib/toast";
 import { cn } from "@/lib/utils";
 import { XIcon } from "lucide-react";
 
-import { workDayEventTagOptions } from "../models";
+import { calendarEventTagOptions } from "../models";
 import {
   buildEventSheetPayload,
-  createWorkDayEvent,
-  deleteWorkDayEvent,
+  createCalendarEvent,
+  deleteCalendarEvent,
   formatDatePickerLabel,
   getDefaultEventSheetForm,
   getEventSheetErrorMessage,
   getEventSheetFormFromEvent,
   getEventSheetTitle,
-  updateWorkDayEvent,
+  updateCalendarEvent,
 } from "./functions";
 import type { EventSheetFormState, EventSheetMode, EventSheetProps } from "./models";
 
@@ -161,10 +161,10 @@ export const EventSheet = ({
 
       if (isEditMode) {
         if (!event?.id) throw new Error("Event id is required.");
-        await updateWorkDayEvent(event.id, { ...payload, user_id: event.user_id });
+        await updateCalendarEvent(event.id, { ...payload, user_id: event.user_id });
         appToast.success("Event updated.");
       } else {
-        await createWorkDayEvent(payload);
+        await createCalendarEvent(payload);
         appToast.success("Event added.");
       }
 
@@ -184,7 +184,7 @@ export const EventSheet = ({
     }
 
     try {
-      await deleteWorkDayEvent(event.id);
+      await deleteCalendarEvent(event.id);
       appToast.success("Event deleted.");
       updateOpen(false);
       onSaved?.();
@@ -242,7 +242,7 @@ export const EventSheet = ({
               </SelectTrigger>
               <SelectContent position="popper">
                 <SelectGroup>
-                  {workDayEventTagOptions.map((opt) => (
+                  {calendarEventTagOptions.map((opt) => (
                     <SelectItem key={opt.value} value={opt.value}>
                       {opt.label}
                     </SelectItem>
