@@ -5,3 +5,14 @@ node_modules
 *.md
 Dockerfile
 .dockerignore
+.env
+.env.*
+*.pem
+*.key
+*.cert
+*.p12
+coverage
+__tests__
+*.test.*
+*.spec.*
+.DS_Store
