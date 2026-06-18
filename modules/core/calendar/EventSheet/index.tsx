@@ -33,7 +33,7 @@ import { UilPen } from "@/assets/icons/UilPen";
 import { UilPlusCircle } from "@/assets/icons/UilPlusCircle";
 import { UilRedo } from "@/assets/icons/UilRedo";
 import { UilTrashAlt } from "@/assets/icons/UilTrashAlt";
-import { DeleteConfirmDialog } from "@/components/core/delete-confirm-dialog";
+import { DeleteConfirmDialog } from "@/components/dialogs/delete-confirm-dialog";
 import { appToast } from "@/lib/toast";
 import { cn } from "@/lib/utils";
 import { XIcon } from "lucide-react";

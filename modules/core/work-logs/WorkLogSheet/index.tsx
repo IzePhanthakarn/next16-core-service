@@ -2,7 +2,7 @@
 
 import { type FormEvent, useMemo, useState } from "react";
 
-import { DeleteConfirmDialog } from "@/components/core/delete-confirm-dialog";
+import { DeleteConfirmDialog } from "@/components/dialogs/delete-confirm-dialog";
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

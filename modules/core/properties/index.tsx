@@ -10,7 +10,7 @@ import {
 } from "react";
 
 import { LineMdLoadingLoop } from "@/assets/icons/LineMdLoadingLoop";
-import { DeleteConfirmDialog } from "@/components/core/delete-confirm-dialog";
+import { DeleteConfirmDialog } from "@/components/dialogs/delete-confirm-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
