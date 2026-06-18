@@ -1,8 +1,8 @@
 "use client";
 
-import { RotateCcwIcon } from "lucide-react";
 import { type FormEvent, useMemo, useState } from "react";
 
+import { DeleteConfirmDialog } from "@/components/core/delete-confirm-dialog";
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,6 +25,7 @@ import { appToast } from "@/lib/toast";
 import { cn } from "@/lib/utils";
 import {
   createWorkLog,
+  deleteWorkLog,
   getWorkLogsErrorMessage,
   updateWorkLog,
 } from "@/modules/core/work-logs/functions";
@@ -36,7 +37,7 @@ import {
   getWorkLogSheetFormFromWorkLog,
   getWorkLogSheetTitle,
 } from "./functions";
-import type { WorkLogSheetFormState, WorkLogSheetProps } from "./models";
+import type { WorkLogSheetFormState, WorkLogSheetMode, WorkLogSheetProps } from "./models";
 import {
   Select,
   SelectContent,
@@ -63,6 +64,9 @@ import {
 import type { CachedPropertyOption } from "@/modules/core/properties/models";
 import PROPERTY_TYPES from "@/constants/properties";
 import { UilRedo } from "@/assets/icons/UilRedo";
+import { UilPen } from "@/assets/icons/UilPen";
+import { UilTrashAlt } from "@/assets/icons/UilTrashAlt";
+import { UilX } from "@/assets/icons/UilX";
 
 type DateLoggedPickerProps = {
   date?: Date;
@@ -121,15 +125,17 @@ export const WorkLogSheet = ({
   const [form, setForm] = useState<WorkLogSheetFormState>(initialForm);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [tagOptions, setTagOptions] = useState<CachedPropertyOption[]>([]);
+  const [internalMode, setInternalMode] = useState<WorkLogSheetMode>(mode);
   const anchor = useComboboxAnchor();
 
-  const isViewMode = mode === "view";
-  const isEditMode = mode === "edit";
-  const isCreateMode = mode === "create";
-  const title = getWorkLogSheetTitle(mode);
+  const isViewMode = internalMode === "view";
+  const isEditMode = internalMode === "edit";
+  const isCreateMode = internalMode === "create";
+  const title = getWorkLogSheetTitle(internalMode);
 
   const updateOpen = (nextOpen: boolean) => {
     if (nextOpen) {
+      setInternalMode(mode);
       setForm(initialForm);
       try {
         const cached = sessionStorage.getItem(PROPERTY_TYPES.WORK_TAGS);
@@ -139,6 +145,11 @@ export const WorkLogSheet = ({
       }
     }
     setOpen(nextOpen);
+  };
+
+  const resetToViewMode = () => {
+    setForm(initialForm);
+    setInternalMode("view");
   };
 
   const resetForm = () => {
@@ -151,6 +162,23 @@ export const WorkLogSheet = ({
       ...initialForm,
       dateLogged: value.dateLogged,
     }));
+  };
+
+  const handleDelete = async () => {
+    if (!workLog?.id) {
+      appToast.error("Work log id is required.");
+      return;
+    }
+
+    try {
+      await deleteWorkLog(workLog.id);
+      appToast.success("Work log deleted.");
+      updateOpen(false);
+      onSaved?.();
+    } catch (error) {
+      appToast.error(getWorkLogsErrorMessage(error));
+      throw error;
+    }
   };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -205,10 +233,10 @@ export const WorkLogSheet = ({
         <form className="flex min-h-0 flex-1 flex-col" onSubmit={handleSubmit}>
           <div className="flex flex-col gap-4 overflow-y-auto px-4 py-2">
             <div className="grid gap-2">
-              <Label htmlFor={`${mode}-work-log-title`}>Title</Label>
+              <Label htmlFor={`${internalMode}-work-log-title`}>Title</Label>
               <Input
                 disabled={isViewMode}
-                id={`${mode}-work-log-title`}
+                id={`${internalMode}-work-log-title`}
                 onChange={(event) =>
                   setForm((value) => ({
                     ...value,
@@ -221,11 +249,11 @@ export const WorkLogSheet = ({
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor={`${mode}-work-log-content`}>Content</Label>
+              <Label htmlFor={`${internalMode}-work-log-content`}>Content</Label>
               <Textarea
                 className="min-h-32 resize-none"
                 disabled={isViewMode}
-                id={`${mode}-work-log-content`}
+                id={`${internalMode}-work-log-content`}
                 onChange={(event) =>
                   setForm((value) => ({
                     ...value,
@@ -253,7 +281,7 @@ export const WorkLogSheet = ({
 
             <div className="grid gap-3 sm:grid-cols-2">
               <div className="grid gap-2">
-                <Label htmlFor={`${mode}-work-log-mood`}>Mood score</Label>
+                <Label htmlFor={`${internalMode}-work-log-mood`}>Mood score</Label>
                 <Select
                   disabled={isViewMode}
                   onValueChange={(mood) =>
@@ -280,7 +308,7 @@ export const WorkLogSheet = ({
               </div>
 
               <div className="grid gap-2">
-                <Label htmlFor={`${mode}-work-log-productivity`}>
+                <Label htmlFor={`${internalMode}-work-log-productivity`}>
                   Productivity score
                 </Label>
                 <Select
@@ -310,7 +338,7 @@ export const WorkLogSheet = ({
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor={`${mode}-work-log-tags`}>Tags</Label>
+              <Label htmlFor={`${internalMode}-work-log-tags`}>Tags</Label>
               <Combobox
                 autoHighlight
                 disabled={isViewMode}
@@ -335,7 +363,7 @@ export const WorkLogSheet = ({
                         ))}
                         {!isViewMode && (
                           <ComboboxChipsInput
-                            id={`${mode}-work-log-tags`}
+                            id={`${internalMode}-work-log-tags`}
                             placeholder="Select tags..."
                           />
                         )}
@@ -359,29 +387,75 @@ export const WorkLogSheet = ({
             </div>
           </div>
 
-          {!isViewMode ? (
+          {isViewMode ? (
             <SheetFooter className="border-t sm:flex-row sm:justify-end">
+              <DeleteConfirmDialog
+                ariaLabel="Delete work log"
+                onConfirm={handleDelete}
+                title="Delete work log"
+                trigger={
+                  <Button type="button" variant="danger" size="lg">
+                    <UilTrashAlt aria-hidden="true" data-icon="inline-start" />
+                    Delete
+                  </Button>
+                }
+              >
+                Are you sure you want to delete {workLog?.title || "this work log"}? <br />
+                This action cannot be undone.
+              </DeleteConfirmDialog>
               <Button
-                disabled={isSubmitting}
-                onClick={resetForm}
+                onClick={(event) => {
+                  event.preventDefault();
+                  setInternalMode("edit");
+                }}
                 type="button"
-                variant="outline"
+                variant="secondary"
                 size="lg"
               >
-                <UilRedo/>
-                Reset form
+                <UilPen aria-hidden="true" data-icon="inline-start" />
+                Edit
               </Button>
+            </SheetFooter>
+          ) : (
+            <SheetFooter className="border-t sm:flex-row sm:justify-end">
+              {isEditMode ? (
+                <Button
+                  disabled={isSubmitting}
+                  onClick={resetToViewMode}
+                  type="button"
+                  variant="outline"
+                  size="lg"
+                >
+                  <UilX aria-hidden="true" data-icon="inline-start" />
+                  Cancel
+                </Button>
+              ) : (
+                <Button
+                  disabled={isSubmitting}
+                  onClick={resetForm}
+                  type="button"
+                  variant="outline"
+                  size="lg"
+                >
+                  <UilRedo aria-hidden="true" data-icon="inline-start" />
+                  Reset form
+                </Button>
+              )}
               <Button
                 isLoading={isSubmitting}
                 type="submit"
                 size="lg"
                 variant={isEditMode ? "warning" : "success"}
               >
-                <UilPlusCircle aria-hidden="true" data-icon="inline-start" />
-                {isEditMode ? "Edit work log" : "Add work log"}
+                {isEditMode ? (
+                  <UilPen aria-hidden="true" data-icon="inline-start" />
+                ) : (
+                  <UilPlusCircle aria-hidden="true" data-icon="inline-start" />
+                )}
+                {isEditMode ? "Save work log" : "Add work log"}
               </Button>
             </SheetFooter>
-          ) : null}
+          )}
         </form>
       </SheetContent>
     </Sheet>

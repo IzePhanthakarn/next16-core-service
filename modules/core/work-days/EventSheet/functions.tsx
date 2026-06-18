@@ -90,6 +90,11 @@ export const updateWorkDayEvent = async (id: string, payload: CreateEventPayload
   return response.data;
 };
 
+export const deleteWorkDayEvent = async (id: string) => {
+  const response = await apiClient.delete(`${WORK_DAYS_API.EVENTS}/${id}`);
+  return response.data;
+};
+
 export const getEventSheetErrorMessage = (error: unknown): string => {
   if (isAxiosError(error)) {
     return (

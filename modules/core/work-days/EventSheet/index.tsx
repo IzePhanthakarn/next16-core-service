@@ -32,6 +32,8 @@ import { UilCalendar } from "@/assets/icons/UilCalendar";
 import { UilPen } from "@/assets/icons/UilPen";
 import { UilPlusCircle } from "@/assets/icons/UilPlusCircle";
 import { UilRedo } from "@/assets/icons/UilRedo";
+import { UilTrashAlt } from "@/assets/icons/UilTrashAlt";
+import { DeleteConfirmDialog } from "@/components/core/delete-confirm-dialog";
 import { appToast } from "@/lib/toast";
 import { cn } from "@/lib/utils";
 import { XIcon } from "lucide-react";
@@ -40,6 +42,7 @@ import { workDayEventTagOptions } from "../models";
 import {
   buildEventSheetPayload,
   createWorkDayEvent,
+  deleteWorkDayEvent,
   formatDatePickerLabel,
   getDefaultEventSheetForm,
   getEventSheetErrorMessage,
@@ -108,6 +111,8 @@ export const EventSheet = ({
 
   useEffect(() => {
     if (open) {
+      // Keep the sheet reset to the selected calendar event when it opens.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setInternalMode(mode);
       setForm(getEventSheetFormFromEvent(event));
     }
@@ -130,6 +135,10 @@ export const EventSheet = ({
   };
 
   const submitForm = async () => {
+    if (isViewMode) {
+      return;
+    }
+
     if (!form.title.trim()) {
       appToast.error("Please enter a title.");
       return;
@@ -165,6 +174,23 @@ export const EventSheet = ({
       appToast.error(getEventSheetErrorMessage(error));
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const deleteEvent = async () => {
+    if (!event?.id) {
+      appToast.error("Event id is required.");
+      return;
+    }
+
+    try {
+      await deleteWorkDayEvent(event.id);
+      appToast.success("Event deleted.");
+      updateOpen(false);
+      onSaved?.();
+    } catch (error) {
+      appToast.error(getEventSheetErrorMessage(error));
+      throw error;
     }
   };
 
@@ -265,8 +291,25 @@ export const EventSheet = ({
 
         {isViewMode ? (
           <SheetFooter className="border-t sm:flex-row sm:justify-end">
+            <DeleteConfirmDialog
+              ariaLabel="Delete event"
+              onConfirm={deleteEvent}
+              title="Delete event"
+              trigger={
+                <Button type="button" variant="danger" size="lg">
+                  <UilTrashAlt aria-hidden="true" data-icon="inline-start" />
+                  Delete
+                </Button>
+              }
+            >
+              Are you sure you want to delete {event?.title || "this event"}? <br />
+              This action cannot be undone.
+            </DeleteConfirmDialog>
             <Button
-              onClick={() => setInternalMode("edit")}
+              onClick={(event) => {
+                event.preventDefault();
+                setInternalMode("edit");
+              }}
               type="button"
               variant="secondary"
               size="lg"
