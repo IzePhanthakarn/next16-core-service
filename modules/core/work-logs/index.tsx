@@ -38,9 +38,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { monthOptions, yearOption } from "@/constants/datetime";
 import PROPERTY_TYPES from "@/constants/properties";
-import { getPropertyOptionsByCode } from "@/modules/core/properties/functions";
 
 import {
   deleteWorkLog,
@@ -69,6 +67,7 @@ import { UilSearch } from "@/assets/icons/UilSearch";
 import { UilPlusCircle } from "@/assets/icons/UilPlusCircle";
 import { UilPen } from "@/assets/icons/UilPen";
 import { UilEye } from "@/assets/icons/UilEye";
+import { getPropertyOptionsByCode, type CachedPropertyOption } from "@/lib/properties";
 
 type WorkLogsFilterState = {
   title: string;
@@ -255,8 +254,17 @@ const DeleteWorkLogDialog = ({
 };
 
 export const WorkLogsPage = () => {
+  const [monthOpts, setMonthOpts] = useState<CachedPropertyOption[]>([]);
+  const [yearOpts, setYearOpts] = useState<CachedPropertyOption[]>([]);
+  const [moodOptions, setMoodOptions] = useState<CachedPropertyOption[]>([]);
+  const [productivityOptions, setProductivityOptions] = useState<CachedPropertyOption[]>([]);
+
   useEffect(() => {
     void getPropertyOptionsByCode(PROPERTY_TYPES.WORK_TAGS);
+    void getPropertyOptionsByCode(PROPERTY_TYPES.MONTH).then(setMonthOpts);
+    void getPropertyOptionsByCode(PROPERTY_TYPES.YEAR).then(setYearOpts);
+    void getPropertyOptionsByCode(PROPERTY_TYPES.MOOD_SCORE).then(setMoodOptions);
+    void getPropertyOptionsByCode(PROPERTY_TYPES.PRODUCTIVITY_SCORE).then(setProductivityOptions);
   }, []);
 
   const {
@@ -417,6 +425,8 @@ export const WorkLogsPage = () => {
         monthlyMoodScore={workLogs.monthly_mood_score}
         monthlyProductivityScore={workLogs.monthly_productivity_score}
         activeDaysTarget={defaultActiveDaysTarget}
+        moodOptions={moodOptions}
+        productivityOptions={productivityOptions}
       />
 
       <div className="overflow-hidden rounded-lg border bg-card">
@@ -455,7 +465,7 @@ export const WorkLogsPage = () => {
               </SelectTrigger>
               <SelectContent position="popper">
                 <SelectGroup>
-                  {monthOptions.map((month) => (
+                  {monthOpts.map((month) => (
                     <SelectItem key={month.value} value={month.value}>
                       {month.label}
                     </SelectItem>
@@ -481,7 +491,7 @@ export const WorkLogsPage = () => {
               </SelectTrigger>
               <SelectContent position="popper">
                 <SelectGroup>
-                  {yearOption.map((year) => (
+                  {yearOpts.map((year) => (
                     <SelectItem key={year.value} value={year.value}>
                       {year.label}
                     </SelectItem>

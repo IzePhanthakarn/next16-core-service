@@ -7,10 +7,6 @@ import { UilSmileBeam } from "@/assets/icons/UilSmileBeam";
 import { CircularProgress } from "@/components/ui/circular-progrss";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
-import {
-  moodScoreOptions,
-  productivityScoreOptions,
-} from "@/constants/worklogs";
 import { cn } from "@/lib/utils";
 
 import {
@@ -22,23 +18,22 @@ import {
 } from "./functions";
 import { defaultActiveDaysTarget, type StatsGridProps } from "./models";
 
+const EMPTY_OPTIONS: { label: string; value: string }[] = [];
+
 export const StatsGrid = ({
   activeDays,
   activeDaysTarget = defaultActiveDaysTarget,
   allWorkLogs,
   monthlyMoodScore,
   monthlyProductivityScore,
+  moodOptions = EMPTY_OPTIONS,
+  productivityOptions = EMPTY_OPTIONS,
 }: StatsGridProps) => {
   const activeDaysValue = getStatsProgressValue(activeDays, activeDaysTarget);
   const monthlyMoodValue = getScoreProgressValue(monthlyMoodScore);
-  const monthlyProductivityValue = getScoreProgressValue(
-    monthlyProductivityScore,
-  );
-  const monthlyMoodLabel = getScoreLabel(monthlyMoodScore, moodScoreOptions);
-  const monthlyProductivityLabel = getScoreLabel(
-    monthlyProductivityScore,
-    productivityScoreOptions,
-  );
+  const monthlyProductivityValue = getScoreProgressValue(monthlyProductivityScore);
+  const monthlyMoodLabel = getScoreLabel(monthlyMoodScore, moodOptions);
+  const monthlyProductivityLabel = getScoreLabel(monthlyProductivityScore, productivityOptions);
   const activeDaysColor = getStatsProgressColor(activeDaysValue);
   const monthlyMoodColor = getStatsProgressColor(monthlyMoodValue);
   const monthlyProductivityColor = getStatsProgressColor(

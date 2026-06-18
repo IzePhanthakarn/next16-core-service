@@ -22,7 +22,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { monthOptions, yearOption } from "@/constants/datetime";
+import PROPERTY_TYPES from "@/constants/properties";
+import { getPropertyOptionsByCode, type CachedPropertyOption } from "@/lib/properties";
 import { cn } from "@/lib/utils";
 
 import {
@@ -40,7 +41,6 @@ import {
   type CalendarEvent,
   type CalendarEventTag,
   calendarEventTagClassNames,
-  calendarEventTagOptions,
   calendarWeekdays,
 } from "./models";
 import { UilAngleLeft } from "@/assets/icons/UilAngleLeft";
@@ -53,7 +53,7 @@ import type { EventSheetMode } from "./EventSheet/models";
 
 type CalendarFilterState = {
   month: string;
-  tag: CalendarEventTag | "all";
+  event: CalendarEventTag | "all";
   year: string;
 };
 
@@ -62,7 +62,7 @@ const getDefaultFilters = (): CalendarFilterState => {
 
   return {
     month: (today.getMonth() + 1).toString().padStart(2, "0"),
-    tag: "all",
+    event: "all",
     year: today.getFullYear().toString(),
   };
 };
@@ -74,16 +74,16 @@ const getVisibleMonthFromFilters = (filters: CalendarFilterState) =>
 
 const buildFilterQuery = (filters: CalendarFilterState) => ({
   month: Number(filters.month),
-  ...(filters.tag !== "all" ? { tag: filters.tag } : {}),
+  ...(filters.event === "all" ? {} : { tag: filters.event }),
   year: Number(filters.year),
 });
 
 const getFiltersFromDate = (
   date: Date,
-  tag: CalendarFilterState["tag"],
+  event: CalendarFilterState["event"],
 ): CalendarFilterState => ({
   month: (date.getMonth() + 1).toString().padStart(2, "0"),
-  tag,
+  event,
   year: date.getFullYear().toString(),
 });
 
@@ -130,7 +130,7 @@ const useCalendarEvents = () => {
   };
 
   const goToMonth = (date: Date) => {
-    const nextFilters = getFiltersFromDate(date, appliedFilters.tag);
+    const nextFilters = getFiltersFromDate(date, appliedFilters.event);
 
     setFilters(nextFilters);
     setAppliedFilters(nextFilters);
@@ -159,6 +159,16 @@ type EventSheetState = {
 
 export const CalendarPage = () => {
   const router = useRouter();
+  const [yearOpts, setYearOpts] = useState<CachedPropertyOption[]>([]);
+  const [monthOpts, setMonthOpts] = useState<CachedPropertyOption[]>([]);
+  const [eventOpts, setEventOpts] = useState<CachedPropertyOption[]>([]);
+
+  useEffect(() => {
+    getPropertyOptionsByCode(PROPERTY_TYPES.YEAR).then(setYearOpts).catch(() => undefined);
+    getPropertyOptionsByCode(PROPERTY_TYPES.MONTH).then(setMonthOpts).catch(() => undefined);
+    getPropertyOptionsByCode(PROPERTY_TYPES.EVENT).then(setEventOpts).catch(() => undefined);
+  }, []);
+
   const {
     errorMessage,
     events,
@@ -358,7 +368,7 @@ export const CalendarPage = () => {
                 </SelectTrigger>
                 <SelectContent position="popper">
                   <SelectGroup>
-                    {yearOption.map((year) => (
+                    {yearOpts.map((year) => (
                       <SelectItem key={year.value} value={year.value}>
                         {year.label}
                       </SelectItem>
@@ -387,7 +397,7 @@ export const CalendarPage = () => {
                 </SelectTrigger>
                 <SelectContent position="popper">
                   <SelectGroup>
-                    {monthOptions.map((month) => (
+                    {monthOpts.map((month) => (
                       <SelectItem key={month.value} value={month.value}>
                         {month.label}
                       </SelectItem>
@@ -398,28 +408,28 @@ export const CalendarPage = () => {
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="calendar-tag">Tag</Label>
+              <Label htmlFor="calendar-event">Event</Label>
               <Select
-                onValueChange={(tag) =>
-                  setFilters((value) => ({
-                    ...value,
-                    tag: tag as CalendarFilterState["tag"],
+                onValueChange={(value) =>
+                  setFilters((prev) => ({
+                    ...prev,
+                    event: value as CalendarFilterState["event"],
                   }))
                 }
-                value={filters.tag}
+                value={filters.event}
               >
                 <SelectTrigger
                   className="h-9 min-h-9 w-full"
-                  id="calendar-tag"
+                  id="calendar-event"
                 >
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent position="popper">
                   <SelectGroup>
-                    <SelectItem value="all">All tags</SelectItem>
-                    {calendarEventTagOptions.map((tag) => (
-                      <SelectItem key={tag.value} value={tag.value}>
-                        {tag.label}
+                    <SelectItem value="all">All events</SelectItem>
+                    {eventOpts.map((opt) => (
+                      <SelectItem key={opt.value} value={opt.value}>
+                        {opt.label}
                       </SelectItem>
                     ))}
                   </SelectGroup>
@@ -456,6 +466,7 @@ export const CalendarPage = () => {
 
       <EventSheet
         event={eventSheet.event}
+        eventOptions={eventOpts}
         mode={eventSheet.mode}
         onOpenChange={(open) => setEventSheet((prev) => ({ ...prev, open }))}
         onSaved={() => {

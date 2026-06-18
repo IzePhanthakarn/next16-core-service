@@ -46,7 +46,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { moodScoreOptions, productivityScoreOptions } from "@/constants/worklogs";
 import { UilPlusCircle } from "@/assets/icons/UilPlusCircle";
 import { UilCalendar } from "@/assets/icons/UilCalendar";
 import {
@@ -61,12 +60,12 @@ import {
   ComboboxValue,
   useComboboxAnchor,
 } from "@/components/ui/combobox";
-import type { CachedPropertyOption } from "@/modules/core/properties/models";
 import PROPERTY_TYPES from "@/constants/properties";
 import { UilRedo } from "@/assets/icons/UilRedo";
 import { UilPen } from "@/assets/icons/UilPen";
 import { UilTrashAlt } from "@/assets/icons/UilTrashAlt";
 import { UilX } from "@/assets/icons/UilX";
+import { CachedPropertyOption } from "@/lib/properties";
 
 type DateLoggedPickerProps = {
   date?: Date;
@@ -125,6 +124,8 @@ export const WorkLogSheet = ({
   const [form, setForm] = useState<WorkLogSheetFormState>(initialForm);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [tagOptions, setTagOptions] = useState<CachedPropertyOption[]>([]);
+  const [moodOptions, setMoodOptions] = useState<CachedPropertyOption[]>([]);
+  const [productivityOptions, setProductivityOptions] = useState<CachedPropertyOption[]>([]);
   const [internalMode, setInternalMode] = useState<WorkLogSheetMode>(mode);
   const anchor = useComboboxAnchor();
 
@@ -138,10 +139,16 @@ export const WorkLogSheet = ({
       setInternalMode(mode);
       setForm(initialForm);
       try {
-        const cached = sessionStorage.getItem(PROPERTY_TYPES.WORK_TAGS);
-        setTagOptions(cached ? (JSON.parse(cached) as CachedPropertyOption[]) : []);
+        const cachedTags = sessionStorage.getItem(PROPERTY_TYPES.WORK_TAGS);
+        setTagOptions(cachedTags ? (JSON.parse(cachedTags) as CachedPropertyOption[]) : []);
+        const cachedMood = sessionStorage.getItem(PROPERTY_TYPES.MOOD_SCORE);
+        setMoodOptions(cachedMood ? (JSON.parse(cachedMood) as CachedPropertyOption[]) : []);
+        const cachedProductivity = sessionStorage.getItem(PROPERTY_TYPES.PRODUCTIVITY_SCORE);
+        setProductivityOptions(cachedProductivity ? (JSON.parse(cachedProductivity) as CachedPropertyOption[]) : []);
       } catch {
         setTagOptions([]);
+        setMoodOptions([]);
+        setProductivityOptions([]);
       }
     }
     setOpen(nextOpen);
@@ -297,7 +304,7 @@ export const WorkLogSheet = ({
                   </SelectTrigger>
                   <SelectContent position="popper">
                     <SelectGroup>
-                      {moodScoreOptions.map((mood) => (
+                      {moodOptions.map((mood) => (
                         <SelectItem key={mood.value} value={mood.value}>
                           {mood.label}
                         </SelectItem>
@@ -326,7 +333,7 @@ export const WorkLogSheet = ({
                   </SelectTrigger>
                   <SelectContent position="popper">
                     <SelectGroup>
-                      {productivityScoreOptions.map((score) => (
+                      {productivityOptions.map((score) => (
                         <SelectItem key={score.value} value={score.value}>
                           {score.label}
                         </SelectItem>

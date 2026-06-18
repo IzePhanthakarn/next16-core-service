@@ -68,29 +68,6 @@ export const calendarEventTagClassNames: Record<CalendarEventTag, string> = {
     "border-[#f1b08a] bg-[#fff3eb] text-[#a54518] dark:border-[#c65f2d]/35 dark:bg-[#c65f2d]/15 dark:text-[#f1b08a]",
 };
 
-export const calendarEventTagOptions: {
-  label: string;
-  value: CalendarEventTag;
-}[] = [
-  { label: "Meeting", value: "blue" },
-  { label: "Personal Leave", value: "gray" },
-  { label: "Onsite Travel", value: "mint" },
-  { label: "Deployment", value: "crimson" },
-  { label: "Code Review", value: "purple" },
-  { label: "Deep Work", value: "terracotta" },
-  { label: "Server Maintenance", value: "amber" },
-  { label: "Public Holidays", value: "coral" },
-];
-
-// 1. Meeting (ประชุมทั่วไป/คุยงาน): สีฟ้า (Blue)
-// 2. Public Holidays (วันหยุดนักขัตฤกษ์): สีแดงอมชมพู (Coral )
-// 3. Personal Leave (วันหยุดที่เราลาเอง/ลาป่วย/ลาพักร้อน): สีเทา(Gray)
-// 4. Onsite Travel (วันเดินทางไปออฟฟิศ/พบลูกค้า): สีมินต์ (Mint)
-// 5. Deployment / Release Production: สีแดงเบอร์กันดี (Crimson)
-// 6. Code Review / Pair Programming: สีม่วง (Purple)
-// 7. Focus Time / Deep Work: สีส้มอิฐ (Terracotta)
-// 8. Incidents / Server Maintenance: สีเหลืองมัสตาร์ด (Amber)
-
 export const emptyCalendarEvents: CalendarEventsData = {
   items: [],
   total_events: 0,

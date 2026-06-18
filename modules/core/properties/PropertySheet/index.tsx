@@ -17,7 +17,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { appToast } from "@/lib/toast";
 import {
   createProperty,
-  getPropertiesErrorMessage,
 } from "@/modules/core/properties/functions";
 
 import {
@@ -28,6 +27,7 @@ import {
 import type { PropertySheetFormState, PropertySheetProps } from "./models";
 import { UilPlusCircle } from "@/assets/icons/UilPlusCircle";
 import { UilRedo } from "@/assets/icons/UilRedo";
+import { getPropertiesErrorMessage } from "@/lib/properties";
 
 export const PropertySheet = ({ onSaved, trigger }: PropertySheetProps) => {
   const [open, setOpen] = useState(false);

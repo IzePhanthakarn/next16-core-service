@@ -39,7 +39,6 @@ import {
   deleteProperty,
   formatPropertyDate,
   getProperties,
-  getPropertiesErrorMessage,
 } from "./functions";
 import {
   emptyProperties,
@@ -52,6 +51,7 @@ import { LucideTags } from "@/assets/icons/LucideTags";
 import { UilSearch } from "@/assets/icons/UilSearch";
 import { UilPlusCircle } from "@/assets/icons/UilPlusCircle";
 import { UilPen } from "@/assets/icons/UilPen";
+import { getPropertiesErrorMessage } from "@/lib/properties";
 
 type PropertiesFilterState = {
   name: string;

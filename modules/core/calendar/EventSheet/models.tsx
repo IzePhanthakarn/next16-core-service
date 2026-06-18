@@ -1,3 +1,4 @@
+import type { CachedPropertyOption } from "@/lib/properties";
 import type { CalendarEvent, CalendarEventTag } from "../models";
 
 export type EventSheetMode = "create" | "view" | "edit";
@@ -14,6 +15,7 @@ export type EventSheetFormState = {
 
 export type EventSheetProps = {
   event?: CalendarEvent;
+  eventOptions?: CachedPropertyOption[];
   mode: EventSheetMode;
   onSaved?: () => void;
   open?: boolean;

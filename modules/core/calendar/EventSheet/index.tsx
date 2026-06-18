@@ -38,7 +38,6 @@ import { appToast } from "@/lib/toast";
 import { cn } from "@/lib/utils";
 import { XIcon } from "lucide-react";
 
-import { calendarEventTagOptions } from "../models";
 import {
   buildEventSheetPayload,
   createCalendarEvent,
@@ -88,8 +87,11 @@ const DatePicker = ({ date, disabled, onSelect }: DatePickerProps) => {
   );
 };
 
+const EMPTY_OPTIONS: { label: string; value: string }[] = [];
+
 export const EventSheet = ({
   event,
+  eventOptions = EMPTY_OPTIONS,
   mode,
   onSaved,
   open: controlledOpen,
@@ -231,18 +233,18 @@ export const EventSheet = ({
           </div>
 
           <div className="grid gap-2">
-            <Label htmlFor={`${internalMode}-event-tag`}>Tag</Label>
+            <Label htmlFor={`${internalMode}-event-type`}>Event</Label>
             <Select
               disabled={isViewMode}
               onValueChange={(tag) => setForm((v) => ({ ...v, tag: tag as EventSheetFormState["tag"] }))}
               value={form.tag}
             >
-              <SelectTrigger className="h-9 min-h-9 w-full" id={`${internalMode}-event-tag`}>
-                <SelectValue placeholder="Select tag" />
+              <SelectTrigger className="h-9 min-h-9 w-full" id={`${internalMode}-event-type`}>
+                <SelectValue placeholder="Select event" />
               </SelectTrigger>
               <SelectContent position="popper">
                 <SelectGroup>
-                  {calendarEventTagOptions.map((opt) => (
+                  {eventOptions.map((opt) => (
                     <SelectItem key={opt.value} value={opt.value}>
                       {opt.label}
                     </SelectItem>

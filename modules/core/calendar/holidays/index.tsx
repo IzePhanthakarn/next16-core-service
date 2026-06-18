@@ -16,7 +16,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
+import PROPERTY_TYPES from "@/constants/properties";
 import PAGE_ROUTE from "@/constants/page_route";
+import { getPropertyOptionsByCode, type CachedPropertyOption } from "@/lib/properties";
 import { cn } from "@/lib/utils";
 
 import {
@@ -30,15 +32,11 @@ import { HolidaySheet } from "./HolidaySheet";
 import type { HolidayData } from "./models";
 import { UilSync } from "@/assets/icons/UilSync";
 
-const AVAILABLE_YEARS = [2026, 2027];
 const CURRENT_YEAR = new Date().getFullYear();
-const DEFAULT_YEAR = AVAILABLE_YEARS.includes(CURRENT_YEAR)
-  ? CURRENT_YEAR
-  : (AVAILABLE_YEARS[0] ?? CURRENT_YEAR);
 
 const useHolidays = () => {
-  const [selectedYear, setSelectedYear] = useState(DEFAULT_YEAR);
-  const [pendingYear, setPendingYear] = useState(DEFAULT_YEAR);
+  const [selectedYear, setSelectedYear] = useState(CURRENT_YEAR);
+  const [pendingYear, setPendingYear] = useState(CURRENT_YEAR);
   const [reloadKey, setReloadKey] = useState(0);
   const [data, setData] = useState<HolidayData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -80,6 +78,12 @@ const useHolidays = () => {
 };
 
 export const HolidaysPage = () => {
+  const [yearOpts, setYearOpts] = useState<CachedPropertyOption[]>([]);
+
+  useEffect(() => {
+    getPropertyOptionsByCode(PROPERTY_TYPES.YEAR).then(setYearOpts).catch(() => undefined);
+  }, []);
+
   const {
     data,
     errorMessage,
@@ -153,9 +157,9 @@ export const HolidaysPage = () => {
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            {AVAILABLE_YEARS.map((year) => (
-              <SelectItem key={year} value={String(year)}>
-                {year}
+            {yearOpts.map((year) => (
+              <SelectItem key={year.value} value={year.value}>
+                {year.label}
               </SelectItem>
             ))}
           </SelectContent>

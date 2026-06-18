@@ -1,9 +1,7 @@
 import { isAxiosError } from "axios";
 
-import {
-  moodScoreOptions,
-  productivityScoreOptions,
-} from "@/constants/worklogs";
+import PROPERTY_TYPES from "@/constants/properties";
+import { getCachedPropertyOptions } from "@/lib/properties";
 import apiClient from "@/lib/api-client";
 
 import {
@@ -44,16 +42,16 @@ export const formatWorkLogTime = (value: string) =>
     timeStyle: "short",
   }).format(new Date(value));
 
-const getScoreOptionLabel = (
-  options: readonly { value: string; label: string }[],
-  value: number
-) => options.find((option) => option.value === value.toString())?.label || value.toString();
+const getScoreOptionLabel = (code: string, value: number) => {
+  const options = getCachedPropertyOptions(code);
+  return options.find((opt) => opt.value === value.toString())?.label ?? value.toString();
+};
 
 export const getMoodScoreLabel = (value: number) =>
-  getScoreOptionLabel(moodScoreOptions, value);
+  getScoreOptionLabel(PROPERTY_TYPES.MOOD_SCORE, value);
 
 export const getProductivityScoreLabel = (value: number) =>
-  getScoreOptionLabel(productivityScoreOptions, value);
+  getScoreOptionLabel(PROPERTY_TYPES.PRODUCTIVITY_SCORE, value);
 
 export const getWorkLogs = async (query: WorkLogsQuery = {}) => {
   const response = await apiClient.get<WorkLogsResponse>("/work-logs", {
