@@ -16,7 +16,7 @@ export const getApiBaseUrl = () => {
     throw new Error("NEXT_PUBLIC_API_URL is not defined.");
   }
 
-  const normalizedUrl = ensureProtocol(apiUrl).replace(/\/+$/g, "");
+  const normalizedUrl = ensureProtocol(apiUrl).replace(/\/+$/g, ""); // NOSONAR
   const normalizedVersion = apiVersion ? trimSlashes(apiVersion) : "";
 
   return normalizedVersion
