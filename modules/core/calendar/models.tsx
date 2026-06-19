@@ -18,6 +18,7 @@ export type CalendarEvent = {
   time?: string;
   tag: CalendarEventTag;
   user_id?: string;
+  isHoliday?: boolean;
 };
 
 export type CalendarEventsData = {

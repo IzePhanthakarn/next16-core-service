@@ -5,6 +5,7 @@ import apiClient from "@/lib/api-client";
 
 import { type CalendarCell, type CalendarEvent } from "./models";
 import type { CalendarEventsQuery, CalendarEventsResponse } from "./models";
+import type { HolidayResponse } from "./holidays/models";
 
 export const getCalendarEvents = async (query: CalendarEventsQuery = {}) => {
   const response = await apiClient.get<CalendarEventsResponse>(
@@ -13,6 +14,22 @@ export const getCalendarEvents = async (query: CalendarEventsQuery = {}) => {
   );
 
   return response.data.data;
+};
+
+export const getCalendarHolidays = async (
+  query: CalendarEventsQuery = {},
+): Promise<CalendarEvent[]> => {
+  const response = await apiClient.get<HolidayResponse>(CALENDAR_API.HOLIDAYS, {
+    params: { month: query.month, year: query.year },
+  });
+
+  return response.data.data.items.map((holiday) => ({
+    id: holiday.id,
+    date: holiday.holiday_date.split("T")[0],
+    isHoliday: true,
+    tag: "coral",
+    title: holiday.holiday_description.trim(),
+  }));
 };
 
 export const getCalendarEventsErrorMessage = (error: unknown) => {

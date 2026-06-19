@@ -29,6 +29,7 @@ import { cn } from "@/lib/utils";
 import {
   getCalendarEvents,
   getCalendarEventsErrorMessage,
+  getCalendarHolidays,
   getCalendarMonth,
   getMonthRangeLabel,
   getMonthTitle,
@@ -90,6 +91,7 @@ const getFiltersFromDate = (
 const useCalendarEvents = () => {
   const [events, setEvents] =
     useState<CalendarEventsData>(emptyCalendarEvents);
+  const [holidays, setHolidays] = useState<CalendarEvent[]>([]);
   const [filters, setFilters] = useState<CalendarFilterState>(defaultFilters);
   const [appliedFilters, setAppliedFilters] =
     useState<CalendarFilterState>(defaultFilters);
@@ -111,10 +113,15 @@ const useCalendarEvents = () => {
       setErrorMessage("");
 
       try {
-        const data = await getCalendarEvents(query);
+        const [data, holidayEvents] = await Promise.all([
+          getCalendarEvents(query),
+          getCalendarHolidays(query),
+        ]);
         setEvents(data);
+        setHolidays(holidayEvents);
       } catch (error) {
         setEvents(emptyCalendarEvents);
+        setHolidays([]);
         setErrorMessage(getCalendarEventsErrorMessage(error));
       } finally {
         setIsLoading(false);
@@ -144,6 +151,7 @@ const useCalendarEvents = () => {
     filters,
     goToMonth,
     handleSearch,
+    holidays,
     isLoading,
     refreshEvents,
     setFilters,
@@ -175,14 +183,15 @@ export const CalendarPage = () => {
     filters,
     goToMonth,
     handleSearch,
+    holidays,
     isLoading,
     refreshEvents,
     setFilters,
     visibleMonth,
   } = useCalendarEvents();
   const calendarDays = useMemo(
-    () => getCalendarMonth(visibleMonth, events.items),
-    [events.items, visibleMonth],
+    () => getCalendarMonth(visibleMonth, [...events.items, ...holidays]),
+    [events.items, holidays, visibleMonth],
   );
   const eventCount = events.total_events;
   const [eventSheet, setEventSheet] = useState<EventSheetState>({
@@ -231,25 +240,38 @@ export const CalendarPage = () => {
             </div>
 
             <div className="space-y-1">
-              {day.events.slice(0, 3).map((event) => (
-                <button
-                  className={cn(
-                    "flex h-8 min-w-0 w-full items-center gap-2 rounded-md border px-2 text-xs font-medium cursor-pointer hover:opacity-80 transition-opacity",
-                    calendarEventTagClassNames[event.tag],
-                  )}
-                  key={event.id}
-                  onClick={() => setEventSheet({ open: true, mode: "view", event })}
-                  title={event.title}
-                  type="button"
-                >
-                  <span className="truncate">{event.title}</span>
-                  {event.time ? (
-                    <span className="ml-auto shrink-0 tabular-nums">
-                      {event.time}
-                    </span>
-                  ) : null}
-                </button>
-              ))}
+              {day.events.slice(0, 3).map((event) =>
+                event.isHoliday ? (
+                  <div
+                    className={cn(
+                      "flex h-8 min-w-0 w-full items-center gap-2 rounded-md border px-2 text-xs font-medium",
+                      calendarEventTagClassNames[event.tag],
+                    )}
+                    key={event.id}
+                    title={event.title}
+                  >
+                    <span className="truncate">{event.title}</span>
+                  </div>
+                ) : (
+                  <button
+                    className={cn(
+                      "flex h-8 min-w-0 w-full items-center gap-2 rounded-md border px-2 text-xs font-medium cursor-pointer hover:opacity-80 transition-opacity",
+                      calendarEventTagClassNames[event.tag],
+                    )}
+                    key={event.id}
+                    onClick={() => setEventSheet({ open: true, mode: "view", event })}
+                    title={event.title}
+                    type="button"
+                  >
+                    <span className="truncate">{event.title}</span>
+                    {event.time ? (
+                      <span className="ml-auto shrink-0 tabular-nums">
+                        {event.time}
+                      </span>
+                    ) : null}
+                  </button>
+                ),
+              )}
               {day.events.length > 3 ? (
                 <div className="px-1 text-xs font-medium text-muted-foreground">
                   {day.events.length - 3} more...
