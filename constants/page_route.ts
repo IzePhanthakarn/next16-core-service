@@ -11,6 +11,9 @@ const PAGE_ROUTE = {
     PROPERTIES: {
         INDEX: "/properties",
         DETAIL: (propertyId: string) => `/properties/${propertyId}`,
+    },
+    TODOS: {
+        INDEX: "/todos",
     }
 }
 

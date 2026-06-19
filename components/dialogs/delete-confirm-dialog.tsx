@@ -22,6 +22,8 @@ type DeleteConfirmDialogProps = {
   onConfirm: () => Promise<void> | void;
   title: string;
   trigger?: ReactNode;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 };
 
 export const DeleteConfirmDialog = ({
@@ -31,16 +33,27 @@ export const DeleteConfirmDialog = ({
   onConfirm,
   title,
   trigger,
+  open,
+  onOpenChange,
 }: DeleteConfirmDialogProps) => {
-  const [open, setOpen] = useState(false);
+  const isControlled = open !== undefined;
+  const [internalOpen, setInternalOpen] = useState(false);
   const [isConfirming, setIsConfirming] = useState(false);
+
+  const dialogOpen = isControlled ? open : internalOpen;
+  const setDialogOpen = (next: boolean) => {
+    if (!isControlled) {
+      setInternalOpen(next);
+    }
+    onOpenChange?.(next);
+  };
 
   const handleConfirm = async () => {
     setIsConfirming(true);
 
     try {
       await onConfirm();
-      setOpen(false);
+      setDialogOpen(false);
     } catch {
       // Keep the dialog open so the caller can show an error toast and retry.
     } finally {
@@ -49,19 +62,21 @@ export const DeleteConfirmDialog = ({
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        {trigger || (
-          <Button
-            aria-label={ariaLabel}
-            size="icon-sm"
-            type="button"
-            variant="danger"
-          >
-            <UilTrashAlt aria-hidden="true" />
-          </Button>
-        )}
-      </DialogTrigger>
+    <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+      {(!isControlled || trigger) && (
+        <DialogTrigger asChild>
+          {trigger || (
+            <Button
+              aria-label={ariaLabel}
+              size="icon-sm"
+              type="button"
+              variant="danger"
+            >
+              <UilTrashAlt aria-hidden="true" />
+            </Button>
+          )}
+        </DialogTrigger>
+      )}
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>

@@ -9,6 +9,7 @@ import { LucideLayoutDashboard } from "@/assets/icons/LucideLayoutDashboard";
 import PAGE_ROUTE from "@/constants/page_route";
 import { LucideTags } from "@/assets/icons/LucideTags";
 import { UilCalendarAlt } from "@/assets/icons/UilCalendarAlt";
+import { UilClipboardNotes } from "@/assets/icons/UilClipboardNotes";
 
 const navItems = [
   {
@@ -30,6 +31,11 @@ const navItems = [
     href: PAGE_ROUTE.PROPERTIES.INDEX,
     label: "Properties",
     icon: <LucideTags className="h-6 w-6" />,
+  },
+  {
+    href: PAGE_ROUTE.TODOS.INDEX,
+    label: "Todo Lists",
+    icon: <UilClipboardNotes className="h-6 w-6" />,
   },
 ];
 
