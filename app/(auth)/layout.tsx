@@ -1,11 +1,15 @@
 import { ModeToggle } from "@/components/mode-toggle";
 import Image from "next/image";
 
-export default function AuthLayout({
+import { redirectIfAuthenticated } from "@/lib/current-user";
+
+export default async function AuthLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  await redirectIfAuthenticated();
+
   return (
     <main
       className="min-h-screen bg-cover bg-center bg-no-repeat relative"

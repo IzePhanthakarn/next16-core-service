@@ -45,13 +45,13 @@ const refreshAccessToken = async (refreshToken: string) => {
   return response.data.data?.access_token || "";
 };
 
-export const getCurrentUser = cache(async () => {
+const resolveCurrentUser = cache(async (): Promise<UserProfile | null> => {
   const cookieStore = await cookies();
   const token = cookieStore.get(ACCESS_TOKEN_COOKIE_NAME)?.value;
   const refreshToken = cookieStore.get(REFRESH_TOKEN_COOKIE_NAME)?.value;
 
   if (!token && !refreshToken) {
-    redirect("/login");
+    return null;
   }
 
   if (token) {
@@ -65,25 +65,43 @@ export const getCurrentUser = cache(async () => {
   }
 
   if (!refreshToken) {
-    redirect("/login");
+    return null;
   }
 
   try {
     const refreshedToken = await refreshAccessToken(refreshToken);
 
     if (!refreshedToken) {
-      redirect("/login");
+      return null;
     }
 
     return await getCurrentUserWithToken(refreshedToken);
   } catch (error) {
     if (isAxiosError(error) && error.response?.status === 401) {
-      redirect("/login");
+      return null;
     }
 
     throw new Error("Failed to load current user.");
   }
 });
+
+export const getCurrentUser = async () => {
+  const user = await resolveCurrentUser();
+
+  if (!user) {
+    redirect("/login");
+  }
+
+  return user;
+};
+
+export const redirectIfAuthenticated = async () => {
+  const user = await resolveCurrentUser();
+
+  if (user) {
+    redirect("/dashboard");
+  }
+};
 
 export const formatUserValue = (value: unknown) => {
   if (value === null || value === undefined) {
