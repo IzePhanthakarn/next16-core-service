@@ -23,6 +23,27 @@ import {
 } from "@/lib/current-user";
 import { LogoutButton } from "@/modules/dashboard/logout-button";
 import { UilUserSquare } from "@/assets/icons/UilUserSquare";
+import { ModeToggle } from "@/components/mode-toggle";
+import { DigitalClock } from "@/components/core/digital-clock";
+import {
+  NotificationDropdown,
+  type NotificationItem,
+} from "@/components/core/notification-dropdown";
+
+const mockNotifications: NotificationItem[] = [
+  {
+    id: "1",
+    title: "Welcome to Core Service",
+    description: "Your account has been set up successfully.",
+    createdAt: "2 hours ago",
+  },
+  {
+    id: "2",
+    title: "New feature available",
+    description: "Check out the latest updates in your dashboard.",
+    createdAt: "1 day ago",
+  },
+];
 
 type AppNavbarProps = {
   user: UserProfile;
@@ -35,8 +56,12 @@ export const AppNavbar = ({ user }: AppNavbarProps) => {
   const initials = getUserInitials(user);
 
   return (
-    <header className="sticky top-0 z-40 flex h-16 shrink-0 items-center justify-end border-b bg-background/95 px-4 backdrop-blur supports-[backdrop-filter]:bg-background/75 sm:px-6">
-      <DropdownMenu>
+    <header className="sticky top-0 z-40 flex h-16 shrink-0 items-center justify-between gap-2 border-b bg-background/95 px-4 backdrop-blur supports-[backdrop-filter]:bg-background/75 sm:px-6">
+      <DigitalClock className="hidden sm:flex" />
+      <div className="flex items-center gap-2">
+        <ModeToggle className="size-9" />
+        <NotificationDropdown notifications={mockNotifications} />
+        <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
             aria-label="Open user menu"
@@ -85,7 +110,8 @@ export const AppNavbar = ({ user }: AppNavbarProps) => {
             />
           </DropdownMenuItem>
         </DropdownMenuContent>
-      </DropdownMenu>
+        </DropdownMenu>
+      </div>
     </header>
   );
 };

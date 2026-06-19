@@ -16,14 +16,14 @@ export function ModeToggle({ className }: Readonly<ModeToggleProps>) {
     <button
       aria-label="Toggle theme"
       className={cn(
-        "relative inline-grid rounded-xl border-2 border-border duration-200 cursor-pointer hover:border-primary",
+        "relative inline-grid h-11 w-11 rounded-lg border-2 border-border duration-200 cursor-pointer hover:border-accent-foreground",
         className
       )}
       type="button"
       onClick={() => setTheme(isDark ? "light" : "dark")}
     >
       <svg
-        className="col-start-1 row-start-1 h-11 w-11 p-1 fill-current transition-all dark:scale-0 dark:-rotate-90"
+        className="col-start-1 row-start-1 h-full w-full p-1 fill-current transition-all dark:scale-0 dark:-rotate-90"
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 24 24"
         role="img"
@@ -34,7 +34,7 @@ export function ModeToggle({ className }: Readonly<ModeToggleProps>) {
       </svg>
 
       <svg
-        className="col-start-1 row-start-1 h-11 w-11 scale-0 rotate-90 p-1 fill-current transition-all dark:scale-100 dark:rotate-0"
+        className="col-start-1 row-start-1 h-full w-full scale-0 rotate-90 p-1 fill-current transition-all dark:scale-100 dark:rotate-0"
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 24 24"
         role="img"
