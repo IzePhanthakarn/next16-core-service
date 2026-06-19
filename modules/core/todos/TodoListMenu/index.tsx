@@ -111,11 +111,11 @@ export const TodoListMenu = ({ todoList, onChanged }: TodoListMenuProps) => {
         <DropdownMenuTrigger asChild>
           <Button
             aria-label="Todo list menu"
-            size="icon-sm"
+            size="icon"
             type="button"
             variant="ghost"
           >
-            <EllipsisVertical aria-hidden="true" />
+            <EllipsisVertical aria-hidden="true" className="size-5" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">

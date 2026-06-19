@@ -1,6 +1,5 @@
 export type TodoListSheetFormState = {
   title: string;
-  color: string;
 };
 
 export type TodoListSheetProps = {
@@ -10,5 +9,4 @@ export type TodoListSheetProps = {
 
 export const getDefaultTodoListSheetForm = (): TodoListSheetFormState => ({
   title: "",
-  color: "",
 });
