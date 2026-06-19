@@ -1,8 +1,14 @@
+import type { Metadata } from "next";
+
 import {
   formatUserValue,
   getCurrentUser,
   getUserDisplayName,
 } from "@/lib/current-user";
+
+export const metadata: Metadata = {
+  title: "Profile",
+};
 
 export default async function ProfilePage() {
   const user = await getCurrentUser();
