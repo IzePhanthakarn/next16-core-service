@@ -10,6 +10,7 @@ import PAGE_ROUTE from "@/constants/page_route";
 import { LucideTags } from "@/assets/icons/LucideTags";
 import { UilCalendarAlt } from "@/assets/icons/UilCalendarAlt";
 import { UilClipboardNotes } from "@/assets/icons/UilClipboardNotes";
+import { LucideFolderKanban } from "@/assets/icons/LucideFolderKanban";
 
 const navItems = [
   {
@@ -36,6 +37,11 @@ const navItems = [
     href: PAGE_ROUTE.TODOS.INDEX,
     label: "Todo Lists",
     icon: <UilClipboardNotes className="h-6 w-6" />,
+  },
+  {
+    href: PAGE_ROUTE.PROJECTS.INDEX,
+    label: "Projects",
+    icon: <LucideFolderKanban className="h-6 w-6" />,
   },
 ];
 

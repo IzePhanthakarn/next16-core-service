@@ -14,6 +14,15 @@ const PAGE_ROUTE = {
     },
     TODOS: {
         INDEX: "/todos",
+    },
+    PROJECTS: {
+        INDEX: "/projects",
+        DETAIL: (projectId: string) => `/projects/${projectId}`,
+        KANBAN: (projectId: string) => `/projects/${projectId}/kanban`,
+        BACKLOGS: (projectId: string) => `/projects/${projectId}/backlogs`,
+        NOTES: (projectId: string) => `/projects/${projectId}/notes`,
+        MEMBERS: (projectId: string) => `/projects/${projectId}/members`,
+        SETTINGS: (projectId: string) => `/projects/${projectId}/settings`,
     }
 }
 
