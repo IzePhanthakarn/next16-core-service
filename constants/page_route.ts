@@ -15,6 +15,9 @@ const PAGE_ROUTE = {
     TODOS: {
         INDEX: "/todos",
     },
+    TRANSACTIONS: {
+        INDEX: "/transactions",
+    },
     PROJECTS: {
         INDEX: "/projects",
         DETAIL: (projectId: string) => `/projects/${projectId}`,

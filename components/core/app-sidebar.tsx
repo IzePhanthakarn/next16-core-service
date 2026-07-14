@@ -11,6 +11,7 @@ import { LucideTags } from "@/assets/icons/LucideTags";
 import { UilCalendarAlt } from "@/assets/icons/UilCalendarAlt";
 import { UilClipboardNotes } from "@/assets/icons/UilClipboardNotes";
 import { LucideFolderKanban } from "@/assets/icons/LucideFolderKanban";
+import { LucideWallet } from "@/assets/icons/LucideWallet";
 
 const navItems = [
   {
@@ -42,6 +43,11 @@ const navItems = [
     href: PAGE_ROUTE.PROJECTS.INDEX,
     label: "Projects",
     icon: <LucideFolderKanban className="h-6 w-6" />,
+  },
+  {
+    href: PAGE_ROUTE.TRANSACTIONS.INDEX,
+    label: "Transactions",
+    icon: <LucideWallet className="h-6 w-6" />,
   },
 ];
 
