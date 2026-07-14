@@ -12,6 +12,7 @@ import { UilCalendarAlt } from "@/assets/icons/UilCalendarAlt";
 import { UilClipboardNotes } from "@/assets/icons/UilClipboardNotes";
 import { LucideFolderKanban } from "@/assets/icons/LucideFolderKanban";
 import { LucideWallet } from "@/assets/icons/LucideWallet";
+import { LucideRepeat } from "@/assets/icons/LucideRepeat";
 
 const navItems = [
   {
@@ -48,6 +49,11 @@ const navItems = [
     href: PAGE_ROUTE.TRANSACTIONS.INDEX,
     label: "Transactions",
     icon: <LucideWallet className="h-6 w-6" />,
+  },
+  {
+    href: PAGE_ROUTE.SUBSCRIPTIONS.INDEX,
+    label: "Subscriptions",
+    icon: <LucideRepeat className="h-6 w-6" />,
   },
 ];
 

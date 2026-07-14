@@ -18,6 +18,9 @@ const PAGE_ROUTE = {
     TRANSACTIONS: {
         INDEX: "/transactions",
     },
+    SUBSCRIPTIONS: {
+        INDEX: "/subscriptions",
+    },
     PROJECTS: {
         INDEX: "/projects",
         DETAIL: (projectId: string) => `/projects/${projectId}`,
