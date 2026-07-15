@@ -10,6 +10,7 @@ import {
   type CreateSubscriptionInput,
   type DeleteResponse,
   type Subscription,
+  type SubscriptionsData,
   type SubscriptionsQuery,
   type UpdateSubscriptionInput,
 } from "./models";
@@ -83,7 +84,7 @@ export const formatNextBillingDate = (subscription: Subscription) => {
 };
 
 export const getSubscriptions = async (query: SubscriptionsQuery = {}) => {
-  const response = await apiClient.get<ApiResponse<Subscription[]>>(
+  const response = await apiClient.get<ApiResponse<SubscriptionsData>>(
     SUBSCRIPTIONS_API.ROOT,
     {
       params: query,

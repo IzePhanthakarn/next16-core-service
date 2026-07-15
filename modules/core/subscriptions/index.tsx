@@ -66,11 +66,14 @@ import {
 } from "./functions";
 import {
   allFilterValue,
+  emptySubscriptionStats,
   itemPerPageOptions,
   type BillingCycle,
   type Subscription,
+  type SubscriptionStats,
   type SubscriptionsQuery,
 } from "./models";
+import { StatsGrid } from "./StatsGrid";
 import { SubscriptionSheet } from "./SubscriptionSheet";
 
 type SubscriptionsFilterState = {
@@ -140,6 +143,7 @@ const getPaginationItems = (currentPage: number, totalPages: number) => {
 
 const useSubscriptions = () => {
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
+  const [stats, setStats] = useState<SubscriptionStats>(emptySubscriptionStats);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemPerPage, setItemPerPage] = useState<number>(itemPerPageOptions[0]);
   const [filters, setFilters] =
@@ -167,7 +171,8 @@ const useSubscriptions = () => {
       try {
         const data = await getSubscriptions(query);
 
-        setSubscriptions(data);
+        setSubscriptions(data.items);
+        setStats(data.stats);
       } catch (error) {
         setErrorMessage(getSubscriptionsErrorMessage(error));
       } finally {
@@ -222,6 +227,7 @@ const useSubscriptions = () => {
     itemPerPage,
     reloadSubscriptions,
     setFilters,
+    stats,
     subscriptions: pagedSubscriptions,
     totalPages,
     updateItemPerPage,
@@ -337,6 +343,7 @@ export const SubscriptionsPage = () => {
     itemPerPage,
     reloadSubscriptions,
     setFilters,
+    stats,
     subscriptions,
     totalPages,
     updateItemPerPage,
@@ -490,6 +497,8 @@ export const SubscriptionsPage = () => {
       </div>
 
       <Separator />
+
+      <StatsGrid stats={stats} />
 
       <div className="overflow-hidden rounded-lg border bg-card">
         <form
