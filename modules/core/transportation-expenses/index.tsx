@@ -9,7 +9,7 @@ import {
 } from "react";
 
 import { LineMdLoadingLoop } from "@/assets/icons/LineMdLoadingLoop";
-import { LucideWallet } from "@/assets/icons/LucideWallet";
+import { UilCarSideview } from "@/assets/icons/UilCarSideview";
 import { UilEye } from "@/assets/icons/UilEye";
 import { UilPen } from "@/assets/icons/UilPen";
 import { UilPlusCircle } from "@/assets/icons/UilPlusCircle";
@@ -64,6 +64,7 @@ import {
   type TransportationExpensesData,
   type TransportationExpensesQuery,
 } from "./models";
+import { StatsGrid } from "./StatsGrid";
 import { TransportationExpenseSheet } from "./TransportationExpenseSheet";
 
 type TransportationExpensesFilterState = {
@@ -402,7 +403,7 @@ export const TransportationExpensesPage = () => {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="space-y-1">
           <div className="flex gap-2 items-center">
-            <LucideWallet className="w-10 h-10 text-primary" />
+            <UilCarSideview className="h-10 w-10 text-primary" />
             <h1 className="text-2xl font-semibold">Transportation Expenses</h1>
           </div>
           <p className="text-sm text-muted-foreground">
@@ -427,6 +428,8 @@ export const TransportationExpensesPage = () => {
       </div>
 
       <Separator />
+
+      <StatsGrid stats={transportationExpenses.stats} />
 
       <div className="overflow-hidden rounded-lg border bg-card">
         <form

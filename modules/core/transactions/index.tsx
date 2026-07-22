@@ -67,6 +67,7 @@ import {
   type TransactionsQuery,
   type TransactionType,
 } from "./models";
+import { StatsGrid } from "./StatsGrid";
 import { TransactionSheet } from "./TransactionSheet";
 
 type TransactionsFilterState = {
@@ -486,6 +487,8 @@ export const TransactionsPage = () => {
       </div>
 
       <Separator />
+
+      <StatsGrid stats={transactions.stats} />
 
       <div className="overflow-hidden rounded-lg border bg-card">
         <form

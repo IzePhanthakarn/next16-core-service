@@ -13,11 +13,26 @@ export type Transaction = {
   updated_at: string;
 };
 
+export type TransactionTopExpenseCategory = {
+  category: string;
+  total_amount: number;
+  count: number;
+};
+
+export type TransactionStats = {
+  total_income: number;
+  total_expense: number;
+  top_expense_category: TransactionTopExpenseCategory[];
+  average_daily_expense: number;
+  transaction_count: number;
+};
+
 export type TransactionsData = {
   items: Transaction[];
   total_items: number;
   total_pages: number;
   current_page: number;
+  stats: TransactionStats;
 };
 
 export type ApiResponse<T> = {
@@ -59,6 +74,13 @@ export const emptyTransactions: TransactionsData = {
   total_items: 0,
   total_pages: 1,
   current_page: 1,
+  stats: {
+    total_income: 0,
+    total_expense: 0,
+    top_expense_category: [],
+    average_daily_expense: 0,
+    transaction_count: 0,
+  },
 };
 
 export const itemPerPageOptions = [10, 20, 50] as const;

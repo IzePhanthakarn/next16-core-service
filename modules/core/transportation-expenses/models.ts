@@ -11,11 +11,26 @@ export type TransportationExpense = {
   updated_at: string;
 };
 
+export type TransportationExpenseCategorySplit = {
+  category: string;
+  total_amount: number;
+  count: number;
+  percentage: number;
+};
+
+export type TransportationExpenseStats = {
+  total_expense: number;
+  average_per_active_day: number;
+  expense_count: number;
+  category_split: TransportationExpenseCategorySplit[];
+};
+
 export type TransportationExpensesData = {
   items: TransportationExpense[];
   total_items: number;
   total_pages: number;
   current_page: number;
+  stats: TransportationExpenseStats;
 };
 
 export type ApiResponse<T> = {
@@ -52,6 +67,12 @@ export const emptyTransportationExpenses: TransportationExpensesData = {
   total_items: 0,
   total_pages: 1,
   current_page: 1,
+  stats: {
+    total_expense: 0,
+    average_per_active_day: 0,
+    expense_count: 0,
+    category_split: [],
+  },
 };
 
 export const itemPerPageOptions = [10, 20, 50] as const;

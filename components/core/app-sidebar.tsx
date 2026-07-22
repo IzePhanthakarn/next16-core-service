@@ -13,6 +13,7 @@ import { UilClipboardNotes } from "@/assets/icons/UilClipboardNotes";
 import { LucideFolderKanban } from "@/assets/icons/LucideFolderKanban";
 import { LucideWallet } from "@/assets/icons/LucideWallet";
 import { LucideRepeat } from "@/assets/icons/LucideRepeat";
+import { UilCarSideview } from "@/assets/icons/UilCarSideview";
 
 const navItems = [
   {
@@ -53,7 +54,7 @@ const navItems = [
   {
     href: PAGE_ROUTE.TRANSPORTATION_EXPENSES.INDEX,
     label: "Transportation Expenses",
-    icon: <LucideWallet className="h-6 w-6" />,
+    icon: <UilCarSideview className="h-6 w-6" />,
   },
   {
     href: PAGE_ROUTE.SUBSCRIPTIONS.INDEX,
