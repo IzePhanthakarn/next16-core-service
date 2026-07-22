@@ -25,25 +25,26 @@ import { LogoutButton } from "@/modules/dashboard/logout-button";
 import { UilUserSquare } from "@/assets/icons/UilUserSquare";
 import { ModeToggle } from "@/components/mode-toggle";
 import { DigitalClock } from "@/components/core/digital-clock";
-import {
-  NotificationDropdown,
-  type NotificationItem,
-} from "@/components/core/notification-dropdown";
+// TODO: Enable notifications when the feature is ready.
+// import {
+//   NotificationDropdown,
+//   type NotificationItem,
+// } from "@/components/core/notification-dropdown";
 
-const mockNotifications: NotificationItem[] = [
-  {
-    id: "1",
-    title: "Welcome to Core Service",
-    description: "Your account has been set up successfully.",
-    createdAt: "2 hours ago",
-  },
-  {
-    id: "2",
-    title: "New feature available",
-    description: "Check out the latest updates in your dashboard.",
-    createdAt: "1 day ago",
-  },
-];
+// const mockNotifications: NotificationItem[] = [
+//   {
+//     id: "1",
+//     title: "Welcome to Core Service",
+//     description: "Your account has been set up successfully.",
+//     createdAt: "2 hours ago",
+//   },
+//   {
+//     id: "2",
+//     title: "New feature available",
+//     description: "Check out the latest updates in your dashboard.",
+//     createdAt: "1 day ago",
+//   },
+// ];
 
 type AppNavbarProps = {
   user: UserProfile;
@@ -60,7 +61,8 @@ export const AppNavbar = ({ user }: AppNavbarProps) => {
       <DigitalClock className="hidden sm:flex" />
       <div className="flex items-center gap-2">
         <ModeToggle className="size-9" />
-        <NotificationDropdown notifications={mockNotifications} />
+        {/* TODO: Enable notifications when the feature is ready. */}
+        {/* <NotificationDropdown notifications={mockNotifications} /> */}
         <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
