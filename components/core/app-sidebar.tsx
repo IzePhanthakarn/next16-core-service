@@ -51,6 +51,11 @@ const navItems = [
     icon: <LucideWallet className="h-6 w-6" />,
   },
   {
+    href: PAGE_ROUTE.TRANSPORTATION_EXPENSES.INDEX,
+    label: "Transportation Expenses",
+    icon: <LucideWallet className="h-6 w-6" />,
+  },
+  {
     href: PAGE_ROUTE.SUBSCRIPTIONS.INDEX,
     label: "Subscriptions",
     icon: <LucideRepeat className="h-6 w-6" />,

@@ -1,0 +1,9 @@
+const TRANSPORTATION_EXPENSES_BASE_PATH = "/transportation-expenses";
+
+const TRANSPORTATION_EXPENSES_API = {
+  ROOT: TRANSPORTATION_EXPENSES_BASE_PATH,
+  DETAIL: (expenseId: string) =>
+    `${TRANSPORTATION_EXPENSES_BASE_PATH}/${expenseId}`,
+} as const;
+
+export default TRANSPORTATION_EXPENSES_API;

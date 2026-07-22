@@ -18,6 +18,9 @@ const PAGE_ROUTE = {
     TRANSACTIONS: {
         INDEX: "/transactions",
     },
+    TRANSPORTATION_EXPENSES: {
+        INDEX: "/transportation-expenses",
+    },
     SUBSCRIPTIONS: {
         INDEX: "/subscriptions",
     },
