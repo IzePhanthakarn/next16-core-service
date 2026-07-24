@@ -1,7 +1,6 @@
-import { isAxiosError } from "axios";
-
 import CALENDAR_API from "@/constants/api/calendar";
 import apiClient from "@/lib/api-client";
+import { getApiErrorMessage } from "@/lib/api-error";
 
 import type { Holiday, HolidayResponse } from "./models";
 
@@ -14,21 +13,8 @@ export const getHolidays = async (year: number) => {
   return response.data.data;
 };
 
-export const getHolidaysErrorMessage = (error: unknown) => {
-  if (isAxiosError(error)) {
-    return (
-      error.response?.data?.message ||
-      error.response?.data?.error ||
-      error.message
-    );
-  }
-
-  if (error instanceof Error) {
-    return error.message;
-  }
-
-  return "Failed to load holidays.";
-};
+export const getHolidaysErrorMessage = (error: unknown) =>
+  getApiErrorMessage(error, "Failed to load holidays.");
 
 const parseHolidayDate = (dateStr: string): Date => {
   const datePart = dateStr.split("T")[0];

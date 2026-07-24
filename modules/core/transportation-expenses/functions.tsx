@@ -1,8 +1,7 @@
-import { isAxiosError } from "axios";
-
 import TRANSPORTATION_EXPENSES_API from "@/constants/api/transportation-expenses";
 import PROPERTY_TYPES from "@/constants/properties";
 import apiClient from "@/lib/api-client";
+import { getApiErrorMessage } from "@/lib/api-error";
 import { getCachedPropertyOptions } from "@/lib/properties";
 
 import type {
@@ -20,10 +19,7 @@ export const getTransportationExpenseCategoryLabel = (category: string) =>
     (option) => option.value === category,
   )?.label ?? category;
 
-export const formatTransportationExpenseDate = (value: string) =>
-  new Intl.DateTimeFormat("en-EN", { dateStyle: "medium" }).format(
-    new Date(value),
-  );
+export { formatMediumDate as formatTransportationExpenseDate } from "@/lib/date";
 
 export const getTransportationExpenses = async (
   query: TransportationExpensesQuery = {},
@@ -67,18 +63,5 @@ export const deleteTransportationExpense = async (id: string) => {
   return response.data;
 };
 
-export const getTransportationExpensesErrorMessage = (error: unknown) => {
-  if (isAxiosError(error)) {
-    return (
-      error.response?.data?.message ||
-      error.response?.data?.error ||
-      error.message
-    );
-  }
-
-  if (error instanceof Error) {
-    return error.message;
-  }
-
-  return "Failed to load transportation expenses.";
-};
+export const getTransportationExpensesErrorMessage = (error: unknown) =>
+  getApiErrorMessage(error, "Failed to load transportation expenses.");

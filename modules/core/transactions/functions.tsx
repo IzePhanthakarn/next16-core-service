@@ -1,8 +1,7 @@
-import { isAxiosError } from "axios";
-
 import TRANSACTIONS_API from "@/constants/api/transactions";
 import PROPERTY_TYPES from "@/constants/properties";
 import apiClient from "@/lib/api-client";
+import { getApiErrorMessage } from "@/lib/api-error";
 import { getCachedPropertyOptions } from "@/lib/properties";
 
 import {
@@ -27,10 +26,7 @@ export const getCategoryLabel = (type: TransactionType, category: string) => {
   return options.find((option) => option.value === category)?.label ?? category;
 };
 
-export const formatTransactionDate = (value: string) =>
-  new Intl.DateTimeFormat("en-EN", {
-    dateStyle: "medium",
-  }).format(new Date(value));
+export { formatMediumDate as formatTransactionDate } from "@/lib/date";
 
 export const getTransactions = async (query: TransactionsQuery = {}) => {
   const response = await apiClient.get<ApiResponse<TransactionsData>>(
@@ -80,18 +76,5 @@ export const deleteTransaction = async (id: string) => {
   return response.data;
 };
 
-export const getTransactionsErrorMessage = (error: unknown) => {
-  if (isAxiosError(error)) {
-    return (
-      error.response?.data?.message ||
-      error.response?.data?.error ||
-      error.message
-    );
-  }
-
-  if (error instanceof Error) {
-    return error.message;
-  }
-
-  return "Failed to load transactions.";
-};
+export const getTransactionsErrorMessage = (error: unknown) =>
+  getApiErrorMessage(error, "Failed to load transactions.");

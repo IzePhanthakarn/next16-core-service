@@ -43,12 +43,7 @@ export const formatDateForApi = (date: Date) => {
   return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}.${milliseconds} ${timezoneSign}${timezoneHours}${timezoneMinutes}`;
 };
 
-export const formatDatePickerLabel = (date?: Date) =>
-  date
-    ? new Intl.DateTimeFormat("en-EN", {
-        dateStyle: "medium",
-      }).format(date)
-    : "Select date";
+export { formatDatePickerLabel } from "@/lib/date";
 
 export const getWorkLogSheetFormFromWorkLog = (
   workLog?: WorkLog

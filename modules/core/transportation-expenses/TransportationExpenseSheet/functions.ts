@@ -39,10 +39,7 @@ export const getTransportationExpenseSheetTitle = (
   return "Add transportation expense";
 };
 
-export const formatDatePickerLabel = (date?: Date) =>
-  date
-    ? new Intl.DateTimeFormat("en-EN", { dateStyle: "medium" }).format(date)
-    : "Select date";
+export { formatDatePickerLabel } from "@/lib/date";
 
 export const getTransportationExpenseSheetFormFromTransportationExpense = (
   expense?: TransportationExpense,

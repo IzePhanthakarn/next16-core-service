@@ -1,8 +1,7 @@
-import { isAxiosError } from "axios";
-
 import PROPERTY_TYPES from "@/constants/properties";
-import { getCachedPropertyOptions } from "@/lib/properties";
 import apiClient from "@/lib/api-client";
+import { getApiErrorMessage } from "@/lib/api-error";
+import { getCachedPropertyOptions } from "@/lib/properties";
 
 import {
   type CreateWorkLogInput,
@@ -32,10 +31,7 @@ export const formatWorkLogDateTime = (value: string) =>
     timeStyle: "short",
   }).format(new Date(value));
 
-export const formatWorkLogDate = (value: string) =>
-  new Intl.DateTimeFormat("en-EN", {
-    dateStyle: "medium",
-  }).format(new Date(value));
+export { formatMediumDate as formatWorkLogDate } from "@/lib/date";
 
 export const formatWorkLogTime = (value: string) =>
   new Intl.DateTimeFormat("en-EN", {
@@ -87,18 +83,5 @@ export const deleteWorkLog = async (id: string) => {
   return response.data;
 };
 
-export const getWorkLogsErrorMessage = (error: unknown) => {
-  if (isAxiosError(error)) {
-    return (
-      error.response?.data?.message ||
-      error.response?.data?.error ||
-      error.message
-    );
-  }
-
-  if (error instanceof Error) {
-    return error.message;
-  }
-
-  return "Failed to load work logs.";
-};
+export const getWorkLogsErrorMessage = (error: unknown) =>
+  getApiErrorMessage(error, "Failed to load work logs.");

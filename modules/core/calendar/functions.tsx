@@ -1,7 +1,6 @@
-import { isAxiosError } from "axios";
-
 import CALENDAR_API from "@/constants/api/calendar";
 import apiClient from "@/lib/api-client";
+import { getApiErrorMessage } from "@/lib/api-error";
 
 import { type CalendarCell, type CalendarEvent } from "./models";
 import type { CalendarEventsQuery, CalendarEventsResponse } from "./models";
@@ -32,21 +31,8 @@ export const getCalendarHolidays = async (
   }));
 };
 
-export const getCalendarEventsErrorMessage = (error: unknown) => {
-  if (isAxiosError(error)) {
-    return (
-      error.response?.data?.message ||
-      error.response?.data?.error ||
-      error.message
-    );
-  }
-
-  if (error instanceof Error) {
-    return error.message;
-  }
-
-  return "Failed to load calendar events.";
-};
+export const getCalendarEventsErrorMessage = (error: unknown) =>
+  getApiErrorMessage(error, "Failed to load calendar events.");
 
 const dateKeyFormatter = new Intl.DateTimeFormat("en-CA", {
   day: "2-digit",

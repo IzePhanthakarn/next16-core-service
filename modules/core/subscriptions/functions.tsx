@@ -1,8 +1,8 @@
-import { isAxiosError } from "axios";
-
 import SUBSCRIPTIONS_API from "@/constants/api/subscriptions";
 import PROPERTY_TYPES from "@/constants/properties";
 import apiClient from "@/lib/api-client";
+import { getApiErrorMessage } from "@/lib/api-error";
+import { formatMediumDate } from "@/lib/date";
 import { getCachedPropertyOptions } from "@/lib/properties";
 
 import {
@@ -15,10 +15,7 @@ import {
   type UpdateSubscriptionInput,
 } from "./models";
 
-export const formatSubscriptionDate = (value: string) =>
-  new Intl.DateTimeFormat("en-EN", {
-    dateStyle: "medium",
-  }).format(new Date(value));
+export { formatMediumDate as formatSubscriptionDate } from "@/lib/date";
 
 export const getCategoryLabel = (category: string | null) => {
   if (!category) {
@@ -78,9 +75,7 @@ export const formatNextBillingDate = (subscription: Subscription) => {
     return "-";
   }
 
-  return new Intl.DateTimeFormat("en-EN", {
-    dateStyle: "medium",
-  }).format(getNextBillingDate(subscription));
+  return formatMediumDate(getNextBillingDate(subscription));
 };
 
 export const getSubscriptions = async (query: SubscriptionsQuery = {}) => {
@@ -132,18 +127,5 @@ export const deleteSubscription = async (id: string) => {
   return response.data;
 };
 
-export const getSubscriptionsErrorMessage = (error: unknown) => {
-  if (isAxiosError(error)) {
-    return (
-      error.response?.data?.message ||
-      error.response?.data?.error ||
-      error.message
-    );
-  }
-
-  if (error instanceof Error) {
-    return error.message;
-  }
-
-  return "Failed to load subscriptions.";
-};
+export const getSubscriptionsErrorMessage = (error: unknown) =>
+  getApiErrorMessage(error, "Failed to load subscriptions.");

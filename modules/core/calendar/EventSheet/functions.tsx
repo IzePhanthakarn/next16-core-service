@@ -1,7 +1,6 @@
-import { isAxiosError } from "axios";
-
 import CALENDAR_API from "@/constants/api/calendar";
 import apiClient from "@/lib/api-client";
+import { getApiErrorMessage } from "@/lib/api-error";
 
 import type { CalendarEvent } from "../models";
 import type { CreateEventPayload, EventSheetFormState, EventSheetMode } from "./models";
@@ -95,21 +94,7 @@ export const deleteCalendarEvent = async (id: string) => {
   return response.data;
 };
 
-export const getEventSheetErrorMessage = (error: unknown): string => {
-  if (isAxiosError(error)) {
-    return (
-      error.response?.data?.message ||
-      error.response?.data?.error ||
-      error.message
-    );
-  }
+export const getEventSheetErrorMessage = (error: unknown): string =>
+  getApiErrorMessage(error, "Failed to save event.");
 
-  if (error instanceof Error) return error.message;
-
-  return "Failed to save event.";
-};
-
-export const formatDatePickerLabel = (date?: Date): string =>
-  date
-    ? new Intl.DateTimeFormat("en-EN", { dateStyle: "medium" }).format(date)
-    : "Select date";
+export { formatDatePickerLabel } from "@/lib/date";

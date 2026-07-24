@@ -4,6 +4,7 @@ import { LucideRepeat } from "@/assets/icons/LucideRepeat";
 import { LucideTags } from "@/assets/icons/LucideTags";
 import { LucideWallet } from "@/assets/icons/LucideWallet";
 import { UilCalendarAlt } from "@/assets/icons/UilCalendarAlt";
+import { Money } from "@/components/core/money";
 import { CircularProgress } from "@/components/ui/circular-progrss";
 import { Separator } from "@/components/ui/separator";
 import { formatAmount } from "@/lib/currency";
@@ -16,13 +17,6 @@ import {
   getPercentage,
 } from "./functions";
 import { type SubscriptionStatsGridProps } from "./models";
-
-const Money = ({ amount }: { amount: number }) => (
-  <span className="tabular-nums">
-    {formatAmount(amount)}
-    <span className="ml-1 text-xs font-normal text-muted-foreground">THB</span>
-  </span>
-);
 
 export const StatsGrid = ({ stats }: SubscriptionStatsGridProps) => {
   const categoryRows = buildCategoryRows(

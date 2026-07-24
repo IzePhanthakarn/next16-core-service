@@ -1,7 +1,6 @@
-import { isAxiosError } from "axios";
-
 import PROJECTS_API, { TASKS_API } from "@/constants/api/projects";
 import apiClient from "@/lib/api-client";
+import { getApiErrorMessage } from "@/lib/api-error";
 
 import type {
   AddProjectMemberInput,
@@ -252,18 +251,5 @@ export const createTaskComment = async (
   return response.data.data;
 };
 
-export const getProjectErrorMessage = (error: unknown) => {
-  if (isAxiosError(error)) {
-    return (
-      error.response?.data?.message ||
-      error.response?.data?.error ||
-      error.message
-    );
-  }
-
-  if (error instanceof Error) {
-    return error.message;
-  }
-
-  return "Something went wrong with the project request.";
-};
+export const getProjectErrorMessage = (error: unknown) =>
+  getApiErrorMessage(error, "Something went wrong with the project request.");

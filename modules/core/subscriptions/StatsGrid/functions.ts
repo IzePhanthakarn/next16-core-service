@@ -7,13 +7,7 @@ export type CategoryRow = {
   count: number;
 };
 
-export const getPercentage = (value: number, total: number) => {
-  if (total <= 0) {
-    return 0;
-  }
-
-  return Math.round(Math.min((value / total) * 100, 100));
-};
+export { getPercentage } from "@/lib/percentage";
 
 // Cycled through the category segments so each slice of the single bar (and its
 // matching legend dot) stays visually distinct.

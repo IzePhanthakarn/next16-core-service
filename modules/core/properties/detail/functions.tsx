@@ -1,7 +1,6 @@
-import { isAxiosError } from "axios";
-
 import PROPERTIES_API from "@/constants/api/properties";
 import apiClient from "@/lib/api-client";
+import { getApiErrorMessage } from "@/lib/api-error";
 
 import type {
   CreatePropertyOptionInput,
@@ -95,21 +94,8 @@ export const deletePropertyOption = async (optionId: string) => {
   return response.data;
 };
 
-export const getPropertyDetailErrorMessage = (error: unknown) => {
-  if (isAxiosError(error)) {
-    return (
-      error.response?.data?.message ||
-      error.response?.data?.error ||
-      error.message
-    );
-  }
-
-  if (error instanceof Error) {
-    return error.message;
-  }
-
-  return "Failed to load property detail.";
-};
+export const getPropertyDetailErrorMessage = (error: unknown) =>
+  getApiErrorMessage(error, "Failed to load property detail.");
 
 export const buildUpdatePayload = (form: {
   name: string;

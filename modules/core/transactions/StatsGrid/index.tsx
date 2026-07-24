@@ -2,20 +2,13 @@ import { LucideTags } from "@/assets/icons/LucideTags";
 import { LucideWallet } from "@/assets/icons/LucideWallet";
 import { UilCalendarAlt } from "@/assets/icons/UilCalendarAlt";
 import { UilClipboardNotes } from "@/assets/icons/UilClipboardNotes";
+import { Money } from "@/components/core/money";
 import { Separator } from "@/components/ui/separator";
-import { formatAmount } from "@/lib/currency";
 import { cn } from "@/lib/utils";
 
 import { getCategoryLabel } from "../functions";
 import { getExpenseBarWidth } from "./functions";
 import type { TransactionStatsGridProps } from "./models";
-
-const Money = ({ amount }: { amount: number }) => (
-  <span className="tabular-nums">
-    {formatAmount(amount)}
-    <span className="ml-1 text-xs font-normal text-muted-foreground">THB</span>
-  </span>
-);
 
 export const StatsGrid = ({ stats }: TransactionStatsGridProps) => {
   const netCashFlow = stats.total_income - stats.total_expense;

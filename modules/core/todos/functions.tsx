@@ -1,7 +1,6 @@
-import { isAxiosError } from "axios";
-
 import TODOS_API from "@/constants/api/todos";
 import apiClient from "@/lib/api-client";
+import { getApiErrorMessage } from "@/lib/api-error";
 
 import {
   type CreateTodoItemInput,
@@ -107,18 +106,5 @@ export const buildReorderedItemIds = (
   ].map((item) => item.id);
 };
 
-export const getTodosErrorMessage = (error: unknown) => {
-  if (isAxiosError(error)) {
-    return (
-      error.response?.data?.message ||
-      error.response?.data?.error ||
-      error.message
-    );
-  }
-
-  if (error instanceof Error) {
-    return error.message;
-  }
-
-  return "Failed to load todo lists.";
-};
+export const getTodosErrorMessage = (error: unknown) =>
+  getApiErrorMessage(error, "Failed to load todo lists.");

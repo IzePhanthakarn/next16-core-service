@@ -1,7 +1,6 @@
-import { isAxiosError } from "axios";
-
 import CALENDAR_API from "@/constants/api/calendar";
 import apiClient from "@/lib/api-client";
+import { getApiErrorMessage } from "@/lib/api-error";
 
 import type { HolidaySheetFormState } from "./models";
 
@@ -17,18 +16,5 @@ export const syncHolidays = async (form: HolidaySheetFormState) => {
   return response.data;
 };
 
-export const getHolidaySyncErrorMessage = (error: unknown) => {
-  if (isAxiosError(error)) {
-    return (
-      error.response?.data?.message ||
-      error.response?.data?.error ||
-      error.message
-    );
-  }
-
-  if (error instanceof Error) {
-    return error.message;
-  }
-
-  return "Failed to sync holidays.";
-};
+export const getHolidaySyncErrorMessage = (error: unknown) =>
+  getApiErrorMessage(error, "Failed to sync holidays.");

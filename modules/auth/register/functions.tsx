@@ -1,12 +1,12 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { AxiosError, isAxiosError } from "axios";
 import { useRouter } from "next/navigation";
 import { type SubmitHandler, useForm } from "react-hook-form";
 
 import AUTH_API from "@/constants/api/auth";
 import apiClient from "@/lib/api-client";
+import { getApiErrorMessage } from "@/lib/api-error";
 import { appToast } from "@/lib/toast";
 
 import { registerSchema, type RegisterFormValues } from "./models";
@@ -20,23 +20,8 @@ export const getRegisterDefaultValues = (): RegisterFormValues => ({
   secret_word: "",
 });
 
-export const getRegisterErrorMessage = (error: unknown) => {
-  if (isAxiosError(error)) {
-    const axiosError = error as AxiosError<{ message?: string; error?: string }>;
-
-    return (
-      axiosError.response?.data?.message ||
-      axiosError.response?.data?.error ||
-      axiosError.message
-    );
-  }
-
-  if (error instanceof Error) {
-    return error.message;
-  }
-
-  return "Register failed. Please try again.";
-};
+export const getRegisterErrorMessage = (error: unknown) =>
+  getApiErrorMessage(error, "Register failed. Please try again.");
 
 export const useRegisterForm = () => {
   const router = useRouter();

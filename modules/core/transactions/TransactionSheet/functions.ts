@@ -36,12 +36,7 @@ export const getTransactionSheetTitle = (mode: TransactionSheetMode) => {
   return "Add transaction";
 };
 
-export const formatDatePickerLabel = (date?: Date) =>
-  date
-    ? new Intl.DateTimeFormat("en-EN", {
-        dateStyle: "medium",
-      }).format(date)
-    : "Select date";
+export { formatDatePickerLabel } from "@/lib/date";
 
 export const getTransactionSheetFormFromTransaction = (
   transaction?: Transaction

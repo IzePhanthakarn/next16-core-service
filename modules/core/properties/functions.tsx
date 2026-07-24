@@ -8,17 +8,14 @@ import {
   type Property,
 } from "./models";
 
+export { formatMediumDate as formatPropertyDate } from "@/lib/date";
+
 type PropertyResponse = {
   status: string;
   code: number;
   message: string;
   data: Property;
 };
-
-export const formatPropertyDate = (value: string) =>
-  new Intl.DateTimeFormat("en-EN", {
-    dateStyle: "medium",
-  }).format(new Date(value));
 
 export const getProperties = async (query: PropertiesQuery = {}) => {
   const response = await apiClient.get<PropertiesResponse>(

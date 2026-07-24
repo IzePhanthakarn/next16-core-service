@@ -411,9 +411,9 @@ export const WorkLogsPage = () => {
               </Button>
             }
           />
-          <Link className="hover:text-primary hover:underline underline-offset-4" href={PAGE_ROUTE.WORK_LOGS.STATS}>
+          {/* <Link className="hover:text-primary hover:underline underline-offset-4" href={PAGE_ROUTE.WORK_LOGS.STATS}>
             view all stats {">"}
-          </Link>
+          </Link> */}
         </div>
       </div>
 
